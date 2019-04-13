@@ -1,0 +1,14 @@
+{
+	"name": "ao3 utilities",
+	"version": "1.0.0",
+	"description": "various ao3 utilities",
+	"main": "",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Vas",
+	"license": "AGPL-3.0",
+	"dependencies": {
+		"jsdom": "*"
+	}
+}
