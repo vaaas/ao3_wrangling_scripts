@@ -1,6 +1,6 @@
 # Bookmarklets
 
-## ao3 wrangling tags
+## ao3 extract wrangling tags
 
 Extracts all tags from a tag wrangling page into a text file for local searching and whatnot. Available in the browser and through a CLI, whichever you fancy best.
 
