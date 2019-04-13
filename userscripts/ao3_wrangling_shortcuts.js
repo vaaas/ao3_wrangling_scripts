@@ -15,10 +15,6 @@
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
-// jshint asi: true
-// jshint esversion: 6
-// jshint browser: true
-
 function wrangling_keystrokes(window) {
 	"use strict"
 	const keys = new Map()
