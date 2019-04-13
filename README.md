@@ -30,7 +30,7 @@ Keyboard shortcuts for the AO3's wrangling interface
 
 ### Installation
 
-Point tampermonkey / greasemonkey / whatever you're using to [this URL](https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js). Script will also work if you inject it with Firefox's Custom Style Script. It won't interfere with your normal AO3 browsing experience.
+Point tampermonkey / greasemonkey / whatever you're using to [this URL](https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js). Script will also work if you inject it with Firefox's Custom Style Script. It won't interfere with your normal AO3 browsing experience.
 
 I've been using it to wrangle for some time now and it hasn't nuked my PC but nevertheless it's provided as-is and I'm not responsible if it gives you antibiotic-resistant colon infections.
 
