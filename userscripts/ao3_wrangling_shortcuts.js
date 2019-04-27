@@ -98,6 +98,14 @@ function wrangling_keystrokes(window) {
 		elements.set("comments", document.querySelector("p.navigation.actions > a"))
 		elements.set("canonical", document.querySelector("#tag_canonical"))
 
+		define_key("A-s", commit_tag_edit)
+		define_key("A-e", focus_syn_bar)
+		define_key("A-f", focus_fandom_bar)
+		define_key("A-u", toggle_unwrangleable)
+		define_key("A-r", open_works)
+		define_key("A-m", open_comments)
+		define_key("A-i", toggle_canonical)
+
 		function commit_tag_edit() { elements.get("save").click() }
 		function focus_syn_bar() { elements.get("syn").focus() }
 		function focus_fandom_bar() { elements.get("fandom").focus() }
@@ -107,14 +115,6 @@ function wrangling_keystrokes(window) {
 		function go_to_synonym() { elements.get("edit_synonym").click() }
 		function open_comments() { window.open(elements.get("comments").href, 1) }
 		function toggle_canonical() { elements.get("canonical").click() }
-
-		define_key("A-s", commit_tag_edit)
-		define_key("A-e", focus_syn_bar)
-		define_key("A-f", focus_fandom_bar)
-		define_key("A-u", toggle_unwrangleable)
-		define_key("A-r", open_works)
-		define_key("A-m", open_comments)
-		define_key("A-i", toggle_canonical)
 
 		if (relationship_check()) {
 			elements.set("characters", document.querySelector("#tag_character_string_autocomplete"))
