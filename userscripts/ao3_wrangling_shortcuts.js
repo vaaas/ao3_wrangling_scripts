@@ -45,7 +45,7 @@ function wrangling_keystrokes(window) {
 		const isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight)
 		return isVisible }
 
-	function define_key(keys, keystring, cb) {
+	function define_key(keystring, cb) {
 		const keyparts = keystring.split("-")
 		const char = keyparts[keyparts.length-1]
 		const modset = new Set(keyparts.slice(0, keyparts.length - 1))
@@ -108,21 +108,21 @@ function wrangling_keystrokes(window) {
 		function open_comments() { window.open(elements.get("comments").href, 1) }
 		function toggle_canonical() { elements.get("canonical").click() }
 
-		define_key(keys, "A-s", commit_tag_edit)
-		define_key(keys, "A-e", focus_syn_bar)
-		define_key(keys, "A-f", focus_fandom_bar)
-		define_key(keys, "A-u", toggle_unwrangleable)
-		define_key(keys, "A-r", open_works)
-		define_key(keys, "A-m", open_comments)
-		define_key(keys, "A-i", toggle_canonical)
+		define_key("A-s", commit_tag_edit)
+		define_key("A-e", focus_syn_bar)
+		define_key("A-f", focus_fandom_bar)
+		define_key("A-u", toggle_unwrangleable)
+		define_key("A-r", open_works)
+		define_key("A-m", open_comments)
+		define_key("A-i", toggle_canonical)
 
 		if (relationship_check()) {
 			elements.set("characters", document.querySelector("#tag_character_string_autocomplete"))
-			define_key(keys, "A-c", focus_characters) }
+			define_key("A-c", focus_characters) }
 
 		if (synonym_check()) {
 			elements.set("edit_synonym", document.querySelector("p.actions:nth-of-type(2) > a"))
-			define_key(keys, "A-g", go_to_synonym) }
+			define_key("A-g", go_to_synonym) }
 
 		function relationship_check() {
 			const element = document.querySelector("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
@@ -144,15 +144,15 @@ function wrangling_keystrokes(window) {
 		elements.set("rows", document.querySelectorAll("tbody > tr"))
 		let selected_row = null
 
-		define_key(keys, "A-s", commit_mass_wrangle)
-		define_key(keys, "A-e", focus_input_bar)
-		define_key(keys, "A-j", select_next_row)
-		define_key(keys, "A-k", select_previous_row)
-		define_key(keys, "A-w", open_edit_tag_page)
-		define_key(keys, "A-m", toggle_mass_wrangling_selected)
-		define_key(keys, "A-l", next_page)
-		define_key(keys, "A-h", previous_page)
-		define_key(keys, "A-r", open_works)
+		define_key("A-s", commit_mass_wrangle)
+		define_key("A-e", focus_input_bar)
+		define_key("A-j", select_next_row)
+		define_key("A-k", select_previous_row)
+		define_key("A-w", open_edit_tag_page)
+		define_key("A-m", toggle_mass_wrangling_selected)
+		define_key("A-l", next_page)
+		define_key("A-h", previous_page)
+		define_key("A-r", open_works)
 
 		function commit_mass_wrangle() { elements.get("save").click() }
 		function focus_input_bar() { elements.get("inputbar").focus() }
