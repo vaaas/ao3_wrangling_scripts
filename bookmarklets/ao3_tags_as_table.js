@@ -36,10 +36,18 @@
 	
 	const serialise = x => `<tr><td>${x.tag}</td> <td>${x.canonical}</td> <td>${x.syn}</td> <td>${x.created}</td> <td>${x.taggings}</td> <td>${x.characters === null ? null : x.characters.join("<br/>")}</td></tr>`
 
+	const is_sunday = () => (new Date).getDay() === 0
+
+	const is_nf = () => RegExp("^/tags/No Fandom/wrangle").test(location.pathname)
+
 	async function main(url) {
+		if (is_sunday())
+			return alert("Don't run this script on Sundays")
+		else if (is_nf())
+			return alert("Don't run this on No Fandom")
 		let counter = 1
 		const parser = new DOMParser()
-		const results = window.open()
+		const results = open()
 		const doc = results.document
 		doc.write("<meta charset='utf-8'><table><tr>")
 		doc.write("<style>" + stylesheet + "</style>")
@@ -52,10 +60,10 @@
 			doc.write(business(dom).map(serialise).join(""))
 			const next = get_next(dom)
 			url = next ? next.href : null
-			await sleep(3000) }
+			await sleep(counter < 1000 ? 3000 : 10000) }
 		doc.write("</table>")
 		doc.title = "Done!"
 		alert("Done!") }
 	
-	main(window.location.href)
+	main(location.href)
 })()
