@@ -2,7 +2,7 @@
 	const stylesheet = "table { border-collapse: collapse; border: 1px solid black; width: 100%; } td, th { padding: 4px; } tr:nth-child(even) { background: #eee; } th { background: #eFe; }"
 	const get = url => new Promise(resolve => {
 		const req = new XMLHttpRequest()
-		req.onload = x => resolve(req.responseText)
+		req.onload = () => resolve(req.responseText)
 		req.open("GET", url)
 		req.send() })
 
@@ -11,13 +11,10 @@
 	const get_attr = (obj, attr) => obj === null ? null : obj[attr]
 	
 	const parse_canonical = elem => {
-		if (elem.innerHTML === "Unwrangleable")
-			return "unwrangleable"
-		else if (elem.innerHTML === "Yes")
-			return "yes"
-		else
-			return "no"
-	}
+		switch (elem.innerText.trim()) {
+			case "Unwrangleable": return "unwrangleable"
+			case "Yes": return "yes"
+			default: return "no" }}
 	
 	const parse_characters = xs => xs === null ? null : Array.from(xs).map(x => x.innerHTML)
 	
