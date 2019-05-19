@@ -26,8 +26,8 @@ function wrangling_keystrokes(window)
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const inner_text_is = what => x => x.innerText.trim() === what
-	const last = arr => arr[arr.length - 1]
-	const initial = arr => arr.slice(0, arr.length - 1)
+	const last = xs => xs[xs.length - 1]
+	const initial = xs => xs.slice(0, xs.length - 1)
 	
 	function key_pressed (keyevent)
 		{ const cb = valid_shortcut_p(keys, keyevent)
