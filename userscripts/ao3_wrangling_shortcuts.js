@@ -23,10 +23,9 @@ function wrangling_keystrokes(window)
 
 	function main() { wrangling_check(window.location.pathname) }
 
-	const $ = q => document.querySelector(q)
-	const $$ = q => Array.from(document.querySelectorAll(q))
+	const $ = (q, node=document) => node.querySelector(q)
+	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const inner_text_is = what => x => x.innerText.trim() === what
-	const head = arr => arr[0]
 	const last = arr => arr[arr.length - 1]
 	const initial = arr => arr.slice(0, arr.length - 1)
 	
@@ -39,10 +38,10 @@ function wrangling_keystrokes(window)
 			keyevent.stopPropagation()
 			return false }}
 	
-	function filter_one(arr, cb)
-		{ for (let i = 0, len = arr.length; i < len; i++)
-			if (cb(arr[i], i, arr))
-				return arr[i]
+	Array.prototype.filter_one = (cb) =>
+		{ for (let i = 0, len = this.length; i < len; i++)
+			if (cb(arr[i], i, this))
+				return this[i]
 		throw new Error("not found") }
 
 	function is_in_view (el)
@@ -193,20 +192,20 @@ function wrangling_keystrokes(window)
 
 		function open_edit_tag_page()
 			{ if (selected_row === null) return
-			const href = filter_one
-				(elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
-				inner_text_is("Edit")).href
+			const href = $$("ul.actions > li > a", elements.get("rows")[selected_row])
+				.filter_one(inner_text_is("Edit"))
+				.href
 			window.open(href, "_blank") }
 
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
-			elements.get("rows")[selected_row].querySelector("th input[type='checkbox']").click() }
+			$$("th input[type='checkbox']", elements.get("rows")[selected_row]).click() }
 		
 		function open_works()
 			{ if (selected_row === null) return
-			const href = filter_one
-				(elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
-				inner_text_is("Works")).href
+			const href = $$("ul.actions > li > a", elements.get("rows")[selected_row])
+				.filter_one(inner_text_is("Works"))
+				.href
 			window.open(href, "_blank") }
 		
 		function next_page()
