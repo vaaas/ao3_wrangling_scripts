@@ -15,41 +15,44 @@
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
-function wrangling_keystrokes(window) {
-	"use strict"
+function wrangling_keystrokes(window)
+	{ "use strict"
 	const keys = new Map()
 
 	main()
 
 	function main() { wrangling_check(window.location.pathname) }
+
+	const $ = q => document.querySelector(q)
+	const $$ = q => Array.from(document.querySelectorAll(q))
+	const inner_text_is = what => x => x.innerText.trim() === what
+	const head = arr => arr[0]
+	const last = arr => arr[arr.length - 1]
+	const initial = arr => arr.slice(0, arr.length - 1)
 	
-	function key_pressed (keyevent) {
-		const cb = valid_shortcut_p(keys, keyevent)
+	function key_pressed (keyevent)
+		{ const cb = valid_shortcut_p(keys, keyevent)
 		if (cb === false) return true
-		else {
-			cb()
+		else
+			{ cb()
 			keyevent.preventDefault()
 			keyevent.stopPropagation()
 			return false }}
 	
-	function filter_one(arr, cb) {
-		for (let i = 0, len = arr.length; i < len; i++)
+	function filter_one(arr, cb)
+		{ for (let i = 0, len = arr.length; i < len; i++)
 			if (cb(arr[i], i, arr))
 				return arr[i]
-		return null }
+		throw new Error("not found") }
 
-	function is_in_view (el) {
-		const rect = el.getBoundingClientRect()
-		const elemTop = rect.top
-		const elemBottom = rect.bottom
-		const isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight)
-		return isVisible }
+	function is_in_view (el)
+		{ const rect = el.getBoundingClientRect()
+		return (rect.top >= 0) && (rect.bottom <= window.innerHeight) }
 
-	function define_key(keystring, cb) {
-		const keyparts = keystring.split("-")
-		const char = keyparts[keyparts.length-1]
-		const modset = new Set(keyparts.slice(0, keyparts.length - 1))
-		let charcode = char.charCodeAt(0)
+	function define_key(keystring, cb)
+		{ const keyparts = keystring.split("-")
+		const modset = new Set(initial(keyparts))
+		let charcode = last(keyparts).charCodeAt(0)
 		if (charcode > 0b1111111)
 			throw new RangeError("character code is larger than 255")
 		if (modset.has("C"))
@@ -60,8 +63,8 @@ function wrangling_keystrokes(window) {
 			charcode += 0b00100000000
 		keys.set(charcode, cb) }
 
-	function keyevent_to_bitmap(event) {
-		if (event.key.length > 1)
+	function keyevent_to_bitmap(event)
+		{ if (event.key.length > 1)
 			return null
 		let charcode = event.key.charCodeAt(0)
 		if (charcode > 0b11111111)
@@ -74,29 +77,29 @@ function wrangling_keystrokes(window) {
 			charcode += 0b00100000000
 		return charcode }
 
-	function valid_shortcut_p(keys, keyevent) {
-		const charcode = keyevent_to_bitmap(keyevent)
+	function valid_shortcut_p(keys, keyevent)
+		{ const charcode = keyevent_to_bitmap(keyevent)
 		if (charcode !== null && (charcode & 0b11100000000) > 0 && keys.has(charcode))
 			return keys.get(charcode)
 		else return false }
 
-	function wrangling_check(pathname) {
-		if (new RegExp("^/tags/([^/]+)/edit$").test(pathname))
+	function wrangling_check(pathname)
+		{ if (new RegExp("^/tags/([^/]+)/edit$").test(pathname))
 			edit_tag_page()
 		else if (new RegExp("^/tags/([^/]+)/wrangle$").test(pathname))
 			wrangle_tags_page() }
 
-	function edit_tag_page() {
-		console.log("edit tag page activated")
+	function edit_tag_page()
+		{ console.log("edit tag page activated")
 		window.onkeydown = key_pressed
 		const elements = new Map()
-		elements.set("save", document.querySelector("p.submit.actions > input[name='commit']"))
-		elements.set("syn", document.querySelector("input#tag_syn_string_autocomplete"))
-		elements.set("fandom", document.querySelector("input#tag_fandom_string_autocomplete"))
-		elements.set("unwrangleable", document.querySelector("#tag_unwrangleable"))
-		elements.set("works", document.querySelector("ul.navigation.actions:nth-of-type(2) > li > a"))
-		elements.set("comments", document.querySelector("p.navigation.actions > a"))
-		elements.set("canonical", document.querySelector("#tag_canonical"))
+		elements.set("save", $("p.submit.actions > input[name='commit']"))
+		elements.set("syn", $("input#tag_syn_string_autocomplete"))
+		elements.set("fandom", $("input#tag_fandom_string_autocomplete"))
+		elements.set("unwrangleable", $("#tag_unwrangleable"))
+		elements.set("works", $("ul.navigation.actions:nth-of-type(2) > li > a"))
+		elements.set("comments", $("p.navigation.actions > a"))
+		elements.set("canonical", $("#tag_canonical"))
 
 		define_key("A-s", commit_tag_edit)
 		define_key("A-e", focus_syn_bar)
@@ -116,32 +119,32 @@ function wrangling_keystrokes(window) {
 		function open_comments() { window.open(elements.get("comments").href, 1) }
 		function toggle_canonical() { elements.get("canonical").click() }
 
-		if (relationship_check()) {
-			elements.set("characters", document.querySelector("#tag_character_string_autocomplete"))
+		if (relationship_check())
+			{ elements.set("characters", $("#tag_character_string_autocomplete"))
 			define_key("A-c", focus_characters) }
 
-		if (synonym_check()) {
-			elements.set("edit_synonym", document.querySelector("p.actions:nth-of-type(2) > a"))
+		if (synonym_check())
+			{ elements.set("edit_synonym", $("p.actions:nth-of-type(2) > a"))
 			define_key("A-g", go_to_synonym) }
 
-		function relationship_check() {
-			const element = document.querySelector("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
+		function relationship_check()
+			{ const element = $("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
 			return (element && element.innerHTML === "Relationship") }
 
-		function synonym_check() {
-			const element = document.querySelector("p.actions:nth-of-type(2) > a")
+		function synonym_check()
+			{ const element = $("p.actions:nth-of-type(2) > a")
 			return (element ? true : false) }}
 
-	function wrangle_tags_page() {
-		console.log("wrangle tags page activated")
+	function wrangle_tags_page()
+		{ console.log("wrangle tags page activated")
 		window.onkeydown = key_pressed
 		document.styleSheets[0].insertRule(".focused { outline: 2px solid #D50000; }", 1)
 		const elements = new Map()
-		elements.set("save", document.querySelector("dd.submit > input[name='commit']"))
-		elements.set("next", document.querySelector("li.next > a"))
-		elements.set("previous", document.querySelector("li.previous > a"))
-		elements.set("inputbar", document.querySelector("#fandom_string_autocomplete"))
-		elements.set("rows", document.querySelectorAll("tbody > tr"))
+		elements.set("save", $("dd.submit > input[name='commit']"))
+		elements.set("next", $("li.next > a"))
+		elements.set("previous", $("li.previous > a"))
+		elements.set("inputbar", $("#fandom_string_autocomplete"))
+		elements.set("rows", $$("tbody > tr"))
 		let selected_row = null
 
 		define_key("A-s", commit_mass_wrangle)
@@ -157,61 +160,61 @@ function wrangling_keystrokes(window) {
 		function commit_mass_wrangle() { elements.get("save").click() }
 		function focus_input_bar() { elements.get("inputbar").focus() }
 
-		function deselect_row() {
-			elements.get("rows")[selected_row].classList.remove("focused") }
+		function deselect_row()
+			{ elements.get("rows")[selected_row].classList.remove("focused") }
 
-		function select_row() {
-			const element = elements.get("rows")[selected_row]
+		function select_row()
+			{ const element = elements.get("rows")[selected_row]
 			element.classList.add("focused")
 			if (!is_in_view(element))
 				element.scrollIntoView(false) }
 
-		function select_first_row() {
-			selected_row = 0
+		function select_first_row()
+			{ selected_row = 0
 			select_row() }
 
-		function select_last_row() {
-			selected_row = elements.get("rows").length - 1
+		function select_last_row()
+			{ selected_row = elements.get("rows").length - 1
 			select_row() }
 
-		function select_next_row() {
-			if (selected_row === null) select_first_row()
+		function select_next_row()
+			{ if (selected_row === null) select_first_row()
 			else if (selected_row + 1 < elements.get("rows").length) {
 				deselect_row()
 				selected_row++
 				select_row() }}
 
-		function select_previous_row() {
-			if (selected_row === null) select_last_row()
-			else if (selected_row > 0) {
-				deselect_row()
+		function select_previous_row()
+			{ if (selected_row === null) select_last_row()
+			else if (selected_row > 0)
+				{ deselect_row()
 				selected_row--
 				select_row() }}
 
-		function open_edit_tag_page() {
-			if (selected_row === null) return
-			const href = filter_one(
-				elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
-				x => x.innerHTML === "Edit").href
-			const win = window.open(href, "_blank") }
+		function open_edit_tag_page()
+			{ if (selected_row === null) return
+			const href = filter_one
+				(elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
+				inner_text_is("Edit")).href
+			window.open(href, "_blank") }
 
-		function toggle_mass_wrangling_selected() {
-			if (selected_row === null) return
+		function toggle_mass_wrangling_selected()
+			{ if (selected_row === null) return
 			elements.get("rows")[selected_row].querySelector("th input[type='checkbox']").click() }
 		
-		function open_works() {
-			if (selected_row === null) return
-			const href = filter_one(
-				elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
-				x => x.innerHTML === "Works").href
-			const win = window.open(href, "_blank") }
+		function open_works()
+			{ if (selected_row === null) return
+			const href = filter_one
+				(elements.get("rows")[selected_row].querySelectorAll("ul.actions > li > a"),
+				inner_text_is("Works")).href
+			window.open(href, "_blank") }
 		
-		function next_page() {
-			const n = elements.get("next")
+		function next_page()
+			{ const n = elements.get("next")
 			if (n) n.click() }
 		
-		function previous_page() {
-			const p = elements.get("previous")
+		function previous_page()
+			{ const p = elements.get("previous")
 			if (p) p.click() }}}
 
 if (document.readyState === "complete")
