@@ -156,14 +156,16 @@ function wrangling_keystrokes(window)
 		define_key("A-h", previous_page)
 		define_key("A-r", open_works)
 
+		const current_row = () => elements.get("rows")[selected_row]
+
 		function commit_mass_wrangle() { elements.get("save").click() }
 		function focus_input_bar() { elements.get("inputbar").focus() }
 
 		function deselect_row()
-			{ elements.get("rows")[selected_row].classList.remove("focused") }
+			{ current_row().classList.remove("focused") }
 
 		function select_row()
-			{ const element = elements.get("rows")[selected_row]
+			{ const element = current_row()
 			element.classList.add("focused")
 			if (!is_in_view(element))
 				element.scrollIntoView(false) }
@@ -192,18 +194,18 @@ function wrangling_keystrokes(window)
 
 		function open_edit_tag_page()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions > li > a", elements.get("rows")[selected_row])
+			const href = $$("ul.actions > li > a", current_row())
 				.filter_one(inner_text_is("Edit"))
 				.href
 			window.open(href, "_blank") }
 
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
-			$$("th input[type='checkbox']", elements.get("rows")[selected_row]).click() }
+			$$("th input[type='checkbox']", current_row()).click() }
 		
 		function open_works()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions > li > a", elements.get("rows")[selected_row])
+			const href = $$("ul.actions > li > a", current_row())
 				.filter_one(inner_text_is("Works"))
 				.href
 			window.open(href, "_blank") }
