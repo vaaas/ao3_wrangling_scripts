@@ -28,7 +28,7 @@ function wrangling_keystrokes(window)
 	const inner_text_is = what => x => x.innerText.trim() === what
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
-	
+
 	function key_pressed (keyevent)
 		{ const cb = valid_shortcut_p(keys, keyevent)
 		if (cb === false) return true
@@ -37,7 +37,7 @@ function wrangling_keystrokes(window)
 			keyevent.preventDefault()
 			keyevent.stopPropagation()
 			return false }}
-	
+
 	Array.prototype.filter_one = (cb) =>
 		{ for (let i = 0, len = this.length; i < len; i++)
 			if (cb(arr[i], i, this))
@@ -100,6 +100,7 @@ function wrangling_keystrokes(window)
 		elements.set("comments", $("p.navigation.actions > a"))
 		elements.set("canonical", $("#tag_canonical"))
 
+
 		define_key("A-s", commit_tag_edit)
 		define_key("A-e", focus_syn_bar)
 		define_key("A-f", focus_fandom_bar)
@@ -117,6 +118,7 @@ function wrangling_keystrokes(window)
 		function go_to_synonym() { elements.get("edit_synonym").click() }
 		function open_comments() { window.open(elements.get("comments").href, 1) }
 		function toggle_canonical() { elements.get("canonical").click() }
+		function allchars() { elements.get("allchars").click() }
 
 		if (relationship_check())
 			{ elements.set("characters", $("#tag_character_string_autocomplete"))
@@ -126,12 +128,20 @@ function wrangling_keystrokes(window)
 			{ elements.set("edit_synonym", $("p.actions:nth-of-type(2) > a"))
 			define_key("A-g", go_to_synonym) }
 
+		if (characters_check())
+			{ elements.set("allchars", $("dd[title='Characters'] a.check_all"))
+			define_key("A-a", allchars) }
+
 		function relationship_check()
 			{ const element = $("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
 			return (element && element.innerHTML === "Relationship") }
 
 		function synonym_check()
 			{ const element = $("p.actions:nth-of-type(2) > a")
+			return (element ? true : false) }
+
+		function characters_check()
+			{ const element = $("dd[title='Characters'] a.check_all")
 			return (element ? true : false) }}
 
 	function wrangle_tags_page()
@@ -202,18 +212,18 @@ function wrangling_keystrokes(window)
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
 			$$("th input[type='checkbox']", current_row()).click() }
-		
+
 		function open_works()
 			{ if (selected_row === null) return
 			const href = $$("ul.actions > li > a", current_row())
 				.filter_one(inner_text_is("Works"))
 				.href
 			window.open(href, "_blank") }
-		
+
 		function next_page()
 			{ const n = elements.get("next")
 			if (n) n.click() }
-		
+
 		function previous_page()
 			{ const p = elements.get("previous")
 			if (p) p.click() }}}
