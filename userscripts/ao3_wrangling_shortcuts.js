@@ -18,16 +18,20 @@
 function wrangling_keystrokes(window)
 	{ "use strict"
 	const keys = new Map()
-
-	main()
-
-	function main() { wrangling_check(window.location.pathname) }
-
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const inner_text_is = what => x => x.innerText.trim() === what
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
+
+	Array.prototype.filter_one = (cb) =>
+		{ for (let i = 0, len = this.length; i < len; i++)
+			if (cb(arr[i], i, this))
+				return this[i]
+		throw new Error("not found") }
+
+
+	function main() { wrangling_check(window.location.pathname) }
 
 	function key_pressed (keyevent)
 		{ const cb = valid_shortcut_p(keys, keyevent)
@@ -37,12 +41,6 @@ function wrangling_keystrokes(window)
 			keyevent.preventDefault()
 			keyevent.stopPropagation()
 			return false }}
-
-	Array.prototype.filter_one = (cb) =>
-		{ for (let i = 0, len = this.length; i < len; i++)
-			if (cb(arr[i], i, this))
-				return this[i]
-		throw new Error("not found") }
 
 	function is_in_view (el)
 		{ const rect = el.getBoundingClientRect()
@@ -226,7 +224,9 @@ function wrangling_keystrokes(window)
 
 		function previous_page()
 			{ const p = elements.get("previous")
-			if (p) p.click() }}}
+			if (p) p.click() }}
+
+	main() }
 
 if (document.readyState === "complete")
 	wrangling_keystrokes(window)
