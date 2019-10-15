@@ -24,12 +24,11 @@ function wrangling_keystrokes(window)
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
 
-	Array.prototype.filter_one = (cb) =>
+	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
-			if (cb(arr[i], i, this))
+			if (cb(this[i], i, this))
 				return this[i]
 		throw new Error("not found") }
-
 
 	function main() { wrangling_check(window.location.pathname) }
 
