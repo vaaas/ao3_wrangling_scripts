@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.1.6
+// @version	0.1.7
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
