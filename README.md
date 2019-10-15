@@ -47,6 +47,7 @@ alt-u | toggle unwrangeable checkbox
 alt-i | toggle canonical checkbox
 alt-c | focus characters autocomplete bar (if relationship tag)
 alt-g | go to the synonym page (if exists)
+alt-a | select all characters in a relationship tag (if any exist)
 
 ### List of bindings — Tag listings
 
@@ -80,4 +81,4 @@ Node.js version of the bookmarklet. The only package dependency is `jsdom` in or
 6. Through your browser's network tab in the developer tools, copy the contents of the `Cookie` header and save them in the `cookie` file in that directory.
 7. `./extract_ao3_wrangling_tags.js THE_URL > some_file.log`
 
-## 
+##
