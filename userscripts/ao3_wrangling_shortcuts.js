@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.1.8
+// @version	0.1.9
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -208,7 +208,7 @@ function wrangling_keystrokes(window)
 
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
-			$$("th input[type='checkbox']", current_row()).click() }
+			$("th input[type='checkbox']", current_row()).click() }
 
 		function open_works()
 			{ if (selected_row === null) return
