@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.2.2
+// @version	0.2.3
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -163,6 +163,7 @@ function wrangling_keystrokes(window)
 		define_key("A-l", next_page)
 		define_key("A-h", previous_page)
 		define_key("A-r", open_works)
+		define_key("A-o", open_mergers_page)
 
 		const current_row = () => elements.get("rows")[selected_row]
 
