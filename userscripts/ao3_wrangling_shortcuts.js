@@ -4,15 +4,15 @@
 //
 // @author	Vasileios Pasialiokis <whiterocket@outlook.com>
 // @namespace https://github.com/vaaas/
-// @downloadURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
+// @downloadURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 //
 // @license	AGPLv3 - https://www.gnu.org/licenses/agpl.html
 //
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.2.1
-// @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
+// @version	0.2.2
+// @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
 function wrangling_keystrokes(window)
