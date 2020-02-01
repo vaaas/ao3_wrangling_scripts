@@ -97,7 +97,6 @@ function wrangling_keystrokes(window)
 		elements.set("comments", $("p.navigation.actions > a"))
 		elements.set("canonical", $("#tag_canonical"))
 
-
 		define_key("A-s", commit_tag_edit)
 		define_key("A-e", focus_syn_bar)
 		define_key("A-f", focus_fandom_bar)
@@ -105,7 +104,9 @@ function wrangling_keystrokes(window)
 		define_key("A-r", open_works)
 		define_key("A-m", open_comments)
 		define_key("A-i", toggle_canonical)
+		define_key("A-o", see_mergers)
 
+		function see_mergers() { location = location = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers" }
 		function commit_tag_edit() { elements.get("save").click() }
 		function focus_syn_bar() { elements.get("syn").focus() }
 		function focus_fandom_bar() { elements.get("fandom").focus() }
