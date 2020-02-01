@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.2.0
+// @version	0.2.1
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_shortcuts/master/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -106,7 +106,7 @@ function wrangling_keystrokes(window)
 		define_key("A-i", toggle_canonical)
 		define_key("A-o", see_mergers)
 
-		function see_mergers() { location = location = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers" }
+		function see_mergers() { window.open(location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers", 1) }
 		function commit_tag_edit() { elements.get("save").click() }
 		function focus_syn_bar() { elements.get("syn").focus() }
 		function focus_fandom_bar() { elements.get("fandom").focus() }
@@ -205,6 +205,15 @@ function wrangling_keystrokes(window)
 			const href = $$("ul.actions > li > a", current_row())
 				.filter_one(inner_text_is("Edit"))
 				.href
+			window.open(href, "_blank") }
+
+		function open_mergers_page()
+			{ if (selected_row === null) return
+			const href = $$("ul.actions > li > a", current_row())
+				.filter_one(inner_text_===("Edit"))
+				.href
+				.match(/(.+)\/edit/)[1] +
+				"/wrangle?page=1&show=mergers"
 			window.open(href, "_blank") }
 
 		function toggle_mass_wrangling_selected()
