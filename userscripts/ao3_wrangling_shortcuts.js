@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.2.3
+// @version	0.2.4
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -211,7 +211,7 @@ function wrangling_keystrokes(window)
 		function open_mergers_page()
 			{ if (selected_row === null) return
 			const href = $$("ul.actions > li > a", current_row())
-				.filter_one(inner_text_===("Edit"))
+				.filter_one(inner_text_is("Edit"))
 				.href
 				.match(/(.+)\/edit/)[1] +
 				"/wrangle?page=1&show=mergers"
