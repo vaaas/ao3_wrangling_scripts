@@ -48,6 +48,7 @@ alt-i | toggle canonical checkbox
 alt-c | focus characters autocomplete bar (if relationship tag)
 alt-g | go to the synonym page (if exists)
 alt-a | select all characters in a relationship tag (if any exist)
+alt-o | open tag mergers
 
 ### List of bindings — Tag listings
 
@@ -62,6 +63,7 @@ alt-m | toggle current tag's mass fandom wrangling checkbox
 alt-r | open works listing
 alt-h | go to previous page
 alt-l | go to next page
+alt-o | open tag mergers
 
 ### Changing bindings
 
