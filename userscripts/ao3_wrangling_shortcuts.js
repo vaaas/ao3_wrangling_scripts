@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.2.4
+// @version	0.3
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -90,7 +90,6 @@ function wrangling_keystrokes(window)
 		window.onkeydown = key_pressed
 		const elements = new Map()
 		elements.set("save", $("p.submit.actions > input[name='commit']"))
-		elements.set("syn", $("input#tag_syn_string_autocomplete"))
 		elements.set("fandom", $("input#tag_fandom_string_autocomplete"))
 		elements.set("unwrangleable", $("#tag_unwrangleable"))
 		elements.set("works", $("ul.navigation.actions:nth-of-type(2) > li > a"))
@@ -108,7 +107,6 @@ function wrangling_keystrokes(window)
 
 		function see_mergers() { window.open(location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers", 1) }
 		function commit_tag_edit() { elements.get("save").click() }
-		function focus_syn_bar() { elements.get("syn").focus() }
 		function focus_fandom_bar() { elements.get("fandom").focus() }
 		function toggle_unwrangleable() { elements.get("unwrangleable").click() }
 		function open_works() { window.open(elements.get("works").href, 1) }
@@ -129,6 +127,11 @@ function wrangling_keystrokes(window)
 		if (characters_check())
 			{ elements.set("allchars", $("dd[title='Characters'] a.check_all"))
 			define_key("A-a", allchars) }
+
+		function focus_syn_bar()
+			{ const x = $(".added.tag .delete")
+			if (x) x.click()
+			$("input#tag_syn_string_autocomplete").focus() }
 
 		function relationship_check()
 			{ const element = $("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
