@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.3
+// @version	0.3.1
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -104,6 +104,7 @@ function wrangling_keystrokes(window)
 		define_key("A-m", open_comments)
 		define_key("A-i", toggle_canonical)
 		define_key("A-o", see_mergers)
+		define_key("A-n", tagname)
 
 		function see_mergers() { window.open(location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers", 1) }
 		function commit_tag_edit() { elements.get("save").click() }
@@ -115,6 +116,7 @@ function wrangling_keystrokes(window)
 		function open_comments() { window.open(elements.get("comments").href, 1) }
 		function toggle_canonical() { elements.get("canonical").click() }
 		function allchars() { elements.get("allchars").click() }
+		function tagname() { $("#tag_name").focus() }
 
 		if (relationship_check())
 			{ elements.set("characters", $("#tag_character_string_autocomplete"))
