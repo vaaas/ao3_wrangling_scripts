@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.3.1
+// @version	0.3.2
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -89,13 +89,16 @@ function wrangling_keystrokes(window)
 		{ console.log("edit tag page activated")
 		window.onkeydown = key_pressed
 		const elements = new Map()
-		elements.set("save", $("p.submit.actions > input[name='commit']"))
-		elements.set("fandom", $("input#tag_fandom_string_autocomplete"))
-		elements.set("unwrangleable", $("#tag_unwrangleable"))
-		elements.set("works", $("ul.navigation.actions:nth-of-type(2) > li > a"))
-		elements.set("comments", $("p.navigation.actions > a"))
-		elements.set("canonical", $("#tag_canonical"))
-
+		const get = x => elements.get(x)
+		const set = (k,v) => elements.set(k, v)
+		set("save", $("p.submit.actions > input[name='commit']"))
+		set("fandom", $("input#tag_fandom_string_autocomplete"))
+		set("unwrangleable", $("#tag_unwrangleable"))
+		set("works", $("ul.navigation.actions:nth-of-type(2) > li > a"))
+		set("comments", $("p.navigation.actions > a"))
+		set("canonical", $("#tag_canonical"))
+		set('tagname', $('#tag_name'))
+		
 		define_key("A-s", commit_tag_edit)
 		define_key("A-e", focus_syn_bar)
 		define_key("A-f", focus_fandom_bar)
@@ -107,27 +110,27 @@ function wrangling_keystrokes(window)
 		define_key("A-n", tagname)
 
 		function see_mergers() { window.open(location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers", 1) }
-		function commit_tag_edit() { elements.get("save").click() }
-		function focus_fandom_bar() { elements.get("fandom").focus() }
-		function toggle_unwrangleable() { elements.get("unwrangleable").click() }
-		function open_works() { window.open(elements.get("works").href, 1) }
-		function focus_characters() { elements.get("characters").focus() }
-		function go_to_synonym() { elements.get("edit_synonym").click() }
-		function open_comments() { window.open(elements.get("comments").href, 1) }
-		function toggle_canonical() { elements.get("canonical").click() }
-		function allchars() { elements.get("allchars").click() }
-		function tagname() { $("#tag_name").focus() }
+		function commit_tag_edit() { get("save").click() }
+		function focus_fandom_bar() { get("fandom").focus() }
+		function toggle_unwrangleable() { get("unwrangleable").click() }
+		function open_works() { window.open(get("works").href, 1) }
+		function focus_characters() { get("characters").focus() }
+		function go_to_synonym() { get("edit_synonym").click() }
+		function open_comments() { window.open(get("comments").href, 1) }
+		function toggle_canonical() { get("canonical").click() }
+		function allchars() { get("allchars").click() }
+		function tagname() { get('tagname').focus() }
 
 		if (relationship_check())
-			{ elements.set("characters", $("#tag_character_string_autocomplete"))
+			{ set("characters", $("#tag_character_string_autocomplete"))
 			define_key("A-c", focus_characters) }
 
 		if (synonym_check())
-			{ elements.set("edit_synonym", $("p.actions:nth-of-type(2) > a"))
+			{ set("edit_synonym", $("p.actions:nth-of-type(2) > a"))
 			define_key("A-g", go_to_synonym) }
 
 		if (characters_check())
-			{ elements.set("allchars", $("dd[title='Characters'] a.check_all"))
+			{ set("allchars", $("dd[title='Characters'] a.check_all"))
 			define_key("A-a", allchars) }
 
 		function focus_syn_bar()
@@ -141,22 +144,24 @@ function wrangling_keystrokes(window)
 
 		function synonym_check()
 			{ const element = $("p.actions:nth-of-type(2) > a")
-			return (element ? true : false) }
+			return Boolean(element) }
 
 		function characters_check()
 			{ const element = $("dd[title='Characters'] a.check_all")
-			return (element ? true : false) }}
+			return Boolean(element) }}
 
 	function wrangle_tags_page()
 		{ console.log("wrangle tags page activated")
 		window.onkeydown = key_pressed
 		document.styleSheets[0].insertRule(".focused { outline: 2px solid #D50000; }", 1)
 		const elements = new Map()
-		elements.set("save", $("dd.submit > input[name='commit']"))
-		elements.set("next", $("li.next > a"))
-		elements.set("previous", $("li.previous > a"))
-		elements.set("inputbar", $("#fandom_string_autocomplete"))
-		elements.set("rows", $$("tbody > tr"))
+		const get = x => elements.get(x)
+		const set = (k,v) => elements.set(k, v)
+		set("save", $("dd.submit > input[name='commit']"))
+		set("next", $("li.next > a"))
+		set("previous", $("li.previous > a"))
+		set("inputbar", $("#fandom_string_autocomplete"))
+		set("rows", $$("tbody > tr"))
 		let selected_row = null
 
 		define_key("A-s", commit_mass_wrangle)
@@ -170,10 +175,10 @@ function wrangling_keystrokes(window)
 		define_key("A-r", open_works)
 		define_key("A-o", open_mergers_page)
 
-		const current_row = () => elements.get("rows")[selected_row]
+		const current_row = () => get("rows")[selected_row]
 
-		function commit_mass_wrangle() { elements.get("save").click() }
-		function focus_input_bar() { elements.get("inputbar").focus() }
+		function commit_mass_wrangle() { get("save").click() }
+		function focus_input_bar() { get("inputbar").focus() }
 
 		function deselect_row()
 			{ current_row().classList.remove("focused") }
@@ -189,12 +194,12 @@ function wrangling_keystrokes(window)
 			select_row() }
 
 		function select_last_row()
-			{ selected_row = elements.get("rows").length - 1
+			{ selected_row = get("rows").length - 1
 			select_row() }
 
 		function select_next_row()
 			{ if (selected_row === null) select_first_row()
-			else if (selected_row + 1 < elements.get("rows").length) {
+			else if (selected_row + 1 < get("rows").length) {
 				deselect_row()
 				selected_row++
 				select_row() }}
@@ -234,11 +239,11 @@ function wrangling_keystrokes(window)
 			window.open(href, "_blank") }
 
 		function next_page()
-			{ const n = elements.get("next")
+			{ const n = get("next")
 			if (n) n.click() }
 
 		function previous_page()
-			{ const p = elements.get("previous")
+			{ const p = get("previous")
 			if (p) p.click() }}
 
 	main() }
