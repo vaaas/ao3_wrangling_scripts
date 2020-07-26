@@ -65,6 +65,12 @@ alt-r | open works listing
 alt-h | go to previous page
 alt-l | go to next page
 alt-o | open tag mergers
+alt-c | open tag comments
+
+### List of bindings — Tag comments
+Binding | Behaviour
+--- | ---
+alt-s | submit comment
 
 ### Changing bindings
 

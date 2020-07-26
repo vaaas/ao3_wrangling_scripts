@@ -17,6 +17,9 @@
 
 function wrangling_keystrokes(window)
 	{ "use strict"
+	const elements = new Map()
+	const get = x => elements.get(x)
+	const set = (k,v) => elements.set(k, v)
 	const keys = new Map()
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
@@ -79,18 +82,26 @@ function wrangling_keystrokes(window)
 			return keys.get(charcode)
 		else return false }
 
-	function wrangling_check(pathname)
-		{ if (new RegExp("^/tags/([^/]+)/edit$").test(pathname))
+	function wrangling_check(x)
+		{ x = x.match(new RegExp("^/tags/[^/]+/(.+)$"))
+		switch(true)
+		{ case x === null: break
+		case x[1] === 'edit':
 			edit_tag_page()
-		else if (new RegExp("^/tags/([^/]+)/wrangle$").test(pathname))
-			wrangle_tags_page() }
+			window.onkeydown = key_pressed
+			break
+		case x[1] === 'wrangle':
+			wrangle_tags_page()
+			window.onkeydown = key_pressed
+			break
+		case x[1] === 'comments':
+			tag_comments_page()
+			window.onkeydown = key_pressed
+			break
+		default: break }}
 
 	function edit_tag_page()
 		{ console.log("edit tag page activated")
-		window.onkeydown = key_pressed
-		const elements = new Map()
-		const get = x => elements.get(x)
-		const set = (k,v) => elements.set(k, v)
 		set("save", $("p.submit.actions > input[name='commit']"))
 		set("fandom", $("input#tag_fandom_string_autocomplete"))
 		set("unwrangleable", $("#tag_unwrangleable"))
@@ -152,11 +163,7 @@ function wrangling_keystrokes(window)
 
 	function wrangle_tags_page()
 		{ console.log("wrangle tags page activated")
-		window.onkeydown = key_pressed
 		document.styleSheets[0].insertRule(".focused { outline: 2px solid #D50000; }", 1)
-		const elements = new Map()
-		const get = x => elements.get(x)
-		const set = (k,v) => elements.set(k, v)
 		set("save", $("dd.submit > input[name='commit']"))
 		set("next", $("li.next > a"))
 		set("previous", $("li.previous > a"))
@@ -174,6 +181,7 @@ function wrangling_keystrokes(window)
 		define_key("A-h", previous_page)
 		define_key("A-r", open_works)
 		define_key("A-o", open_mergers_page)
+		define_key("A-c", open_comments)
 
 		const current_row = () => get("rows")[selected_row]
 
@@ -226,6 +234,16 @@ function wrangling_keystrokes(window)
 				.match(/(.+)\/edit/)[1] +
 				"/wrangle?page=1&show=mergers"
 			window.open(href, "_blank") }
+		
+		function open_comments()
+			{ if (selected_row === null) return
+			console.log('swag')
+			const href = $$("ul.actions > li > a", current_row())
+				.filter_one(inner_text_is("Edit"))
+				.href
+				.match(/(.+)\/edit/)[1] +
+				"/comments"
+			window.open(href, "_blank") }
 
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
@@ -245,6 +263,17 @@ function wrangling_keystrokes(window)
 		function previous_page()
 			{ const p = get("previous")
 			if (p) p.click() }}
+	
+	function tag_comments_page()
+		{ console.log('tag comments page activated')
+		set('textarea', $('textarea'))
+		set('submit', $('.new_comment input[type="submit"]'))
+		
+		window.requestAnimationFrame(() => get('textarea').focus())
+		
+		define_key('A-s', post_comment)
+		
+		function post_comment() { get('submit').click() }}
 
 	main() }
 
