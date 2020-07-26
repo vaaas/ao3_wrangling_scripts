@@ -39,7 +39,7 @@ I've been using it to wrangle for some time now and it hasn't nuked my PC but ne
 Binding | Behaviour
 --- | ---
 alt-s | commit edits
-alt-e | focus synonym autocomplete bar
+alt-e | focus synonym autocomplete bar. if the tag is already a synonym, remove the synonym and then focus the bar
 alt-f | focus fandom autocomplete bar
 alt-r | open works listing
 alt-m | open comments page
@@ -49,6 +49,7 @@ alt-c | focus characters autocomplete bar (if relationship tag)
 alt-g | go to the synonym page (if exists)
 alt-a | select all characters in a relationship tag (if any exist)
 alt-o | open tag mergers
+alt-n | focus the tag's name
 
 ### List of bindings — Tag listings
 
