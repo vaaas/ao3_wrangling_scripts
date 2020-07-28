@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.4.0
+// @version	0.4.1
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -23,7 +23,7 @@ function wrangling_keystrokes(window)
 	const keys = new Map()
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
-	const inner_text_is = what => x => x.innerText.trim() === what
+	const href_ends_with = x => e => e.href.endsWith(x)
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
 
@@ -221,15 +221,15 @@ function wrangling_keystrokes(window)
 
 		function open_edit_tag_page()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions > li > a", current_row())
-				.filter_one(inner_text_is("Edit"))
+			const href = $$("ul.actions li a", current_row())
+				.filter_one(href_ends_with("edit"))
 				.href
 			window.open(href, "_blank") }
 
 		function open_mergers_page()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions > li > a", current_row())
-				.filter_one(inner_text_is("Edit"))
+			const href = $$("ul.actions li a", current_row())
+				.filter_one(href_ends_with("edit"))
 				.href
 				.match(/(.+)\/edit/)[1] +
 				"/wrangle?page=1&show=mergers"
@@ -238,8 +238,8 @@ function wrangling_keystrokes(window)
 		function open_comments()
 			{ if (selected_row === null) return
 			console.log('swag')
-			const href = $$("ul.actions > li > a", current_row())
-				.filter_one(inner_text_is("Edit"))
+			const href = $$("ul.actions li a", current_row())
+				.filter_one(href_ends_with("edit"))
 				.href
 				.match(/(.+)\/edit/)[1] +
 				"/comments"
@@ -251,8 +251,8 @@ function wrangling_keystrokes(window)
 
 		function open_works()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions > li > a", current_row())
-				.filter_one(inner_text_is("Works"))
+			const href = $$("ul.actions li a", current_row())
+				.filter_one(href_ends_with("works"))
 				.href
 			window.open(href, "_blank") }
 
