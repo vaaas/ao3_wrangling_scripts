@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.4.1
+// @version	0.4.2
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -145,7 +145,7 @@ function wrangling_keystrokes(window)
 			define_key("A-a", allchars) }
 
 		function focus_syn_bar()
-			{ const x = $(".added.tag .delete")
+			{ const x = $("dl:nth-of-type(1) .delete")
 			if (x) x.click()
 			$("input#tag_syn_string_autocomplete").focus() }
 
