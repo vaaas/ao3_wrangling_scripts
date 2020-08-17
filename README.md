@@ -72,6 +72,17 @@ Binding | Behaviour
 --- | ---
 alt-s | submit comment
 
+### List of bindings — New tag
+Binding | Behaviour
+--- | ---
+alt-e | focus tag name
+alt-i | toggle canonical
+alt-f | fandom tag
+alt-r | relationship tag
+alt-c | character tag
+alt-a | additional tag
+alt-s | submit
+
 ### Changing bindings
 
 There's no pretty GUI for changing the bindings, but you can search for "define_key" and change the second argument, which defines the key sequence. Only Alt prefixes are used by default ("A-") but you should be able to use CTRL and Shift as well ("C-" / "S-").

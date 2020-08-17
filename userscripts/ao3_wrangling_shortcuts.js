@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.4.2
+// @version	0.5
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -26,6 +26,8 @@ function wrangling_keystrokes(window)
 	const href_ends_with = x => e => e.href.endsWith(x)
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
+	const focus = x => () => x.focus()
+	const click = x => () => x.click()
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
@@ -83,18 +85,22 @@ function wrangling_keystrokes(window)
 		else return false }
 
 	function wrangling_check(x)
-		{ x = x.match(new RegExp("^/tags/[^/]+/(.+)$"))
+		{ let y = x.match(new RegExp("^/tags/[^/]+/(.+)$"))
 		switch(true)
-		{ case x === null: break
-		case x[1] === 'edit':
+		{ case x === '/tags/new':
+			new_tag_page()
+			window.onkeydown = key_pressed
+			break
+		case y === null: break
+		case y[1] === 'edit':
 			edit_tag_page()
 			window.onkeydown = key_pressed
 			break
-		case x[1] === 'wrangle':
+		case y[1] === 'wrangle':
 			wrangle_tags_page()
 			window.onkeydown = key_pressed
 			break
-		case x[1] === 'comments':
+		case y[1] === 'comments':
 			tag_comments_page()
 			window.onkeydown = key_pressed
 			break
@@ -274,6 +280,24 @@ function wrangling_keystrokes(window)
 		define_key('A-s', post_comment)
 		
 		function post_comment() { get('submit').click() }}
+	
+	function new_tag_page()
+		{ console.log('new tag page activated')
+		const name = $('#tag_name')
+		const canonical = $('#tag_canonical')
+		const fandom = $('#tag_type_fandom')
+		const character = $('#tag_type_character')
+		const relationship = $('#tag_type_relationship')
+		const freeform = $('#tag_type_freeform')
+		const submit = $('p.submit.actions input[type="submit"]')
+		
+		define_key('A-e', focus(name))
+		define_key('A-i', click(canonical))
+		define_key('A-f', click(fandom))
+		define_key('A-c', click(character))
+		define_key('A-r', click(relationship))
+		define_key('A-a', click(freeform))
+		define_key('A-s', click(submit)) }
 
 	main() }
 
