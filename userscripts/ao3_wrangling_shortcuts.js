@@ -145,7 +145,7 @@ function wrangling_keystrokes(window)
 			define_key("A-a", allchars) }
 
 		function focus_syn_bar()
-			{ const x = $("dl:nth-of-type(1) .delete")
+			{ const x = $("#edit_tag fieldset:first-of-type .delete")
 			if (x) x.click()
 			$("input#tag_syn_string_autocomplete").focus() }
 
