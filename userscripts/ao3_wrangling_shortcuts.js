@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.5.1
+// @version	0.5.2
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -89,6 +89,10 @@ function wrangling_keystrokes(window)
 		switch(true)
 		{ case x === '/tags/new':
 			new_tag_page()
+			window.onkeydown = key_pressed
+			break
+		case x === '/tag_wranglings':
+			wrangle_tags_page()
 			window.onkeydown = key_pressed
 			break
 		case y === null: break
