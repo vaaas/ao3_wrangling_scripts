@@ -11,12 +11,16 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.5.2
+// @version	0.5.3
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
 function wrangling_keystrokes(window)
 	{ "use strict"
+	// combinators
+	const K_ = a => b => () => a(b) // kestrel once removed
+
+	// utility
 	const elements = new Map()
 	const get = x => elements.get(x)
 	const set = (k,v) => elements.set(k, v)
@@ -26,8 +30,9 @@ function wrangling_keystrokes(window)
 	const href_ends_with = x => e => e.href.endsWith(x)
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
-	const focus = x => () => x.focus()
-	const click = x => () => x.click()
+	const focus = x => x.focus()
+	const click = x => x.click()
+	const open = x => window.open(x, 1)
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
@@ -38,7 +43,7 @@ function wrangling_keystrokes(window)
 	function main() { wrangling_check(window.location.pathname) }
 
 	function key_pressed (keyevent)
-		{ const cb = valid_shortcut_p(keys, keyevent)
+		{ const cb = valid_shortcut_p(keyevent)
 		if (cb === false) return true
 		else
 			{ cb()
@@ -78,7 +83,7 @@ function wrangling_keystrokes(window)
 			charcode += 0b00100000000
 		return charcode }
 
-	function valid_shortcut_p(keys, keyevent)
+	function valid_shortcut_p(keyevent)
 		{ const charcode = keyevent_to_bitmap(keyevent)
 		if (charcode !== null && (charcode & 0b11100000000) > 0 && keys.has(charcode))
 			return keys.get(charcode)
@@ -274,16 +279,16 @@ function wrangling_keystrokes(window)
 			{ const p = get("previous")
 			if (p) p.click() }}
 	
-	function tag_comments_page()
+  	function tag_comments_page()
 		{ console.log('tag comments page activated')
-		set('textarea', $('textarea'))
-		set('submit', $('.new_comment input[type="submit"]'))
+		const textarea = $('textarea')
+		const submit = $('.new_comment input[type="submit"]')
+		const href = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/edit'
 		
-		window.requestAnimationFrame(() => get('textarea').focus())
+		window.requestAnimationFrame(K_(focus)(textarea))
 		
-		define_key('A-s', post_comment)
-		
-		function post_comment() { get('submit').click() }}
+		define_key('A-s', K_(click)(submit))
+		define_key('A-w', K_(open)(href)) }
 	
 	function new_tag_page()
 		{ console.log('new tag page activated')
@@ -295,13 +300,13 @@ function wrangling_keystrokes(window)
 		const freeform = $('#tag_type_freeform')
 		const submit = $('p.submit.actions input[type="submit"]')
 		
-		define_key('A-e', focus(name))
-		define_key('A-i', click(canonical))
-		define_key('A-f', click(fandom))
-		define_key('A-c', click(character))
-		define_key('A-r', click(relationship))
-		define_key('A-a', click(freeform))
-		define_key('A-s', click(submit)) }
+		define_key('A-e', K_(focus)(name))
+		define_key('A-i', K_(click)(canonical))
+		define_key('A-f', K_(click)(fandom))
+		define_key('A-c', K_(click)(character))
+		define_key('A-r', K_(click)(relationship))
+		define_key('A-a', K_(click)(freeform))
+		define_key('A-s', K_(click)(submit)) }
 
 	main() }
 
