@@ -11,19 +11,16 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.5.3
+// @version	0.6.0
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
 function wrangling_keystrokes(window)
-	{ "use strict"
+	{ 'use strict'
 	// combinators
 	const K_ = a => b => () => a(b) // kestrel once removed
 
 	// utility
-	const elements = new Map()
-	const get = x => elements.get(x)
-	const set = (k,v) => elements.set(k, v)
 	const keys = new Map()
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
@@ -33,12 +30,13 @@ function wrangling_keystrokes(window)
 	const focus = x => x.focus()
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
+	const pipe = (x, xs) => xs.reduce((a,b) => b(a), x)
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
 			if (cb(this[i], i, this))
 				return this[i]
-		throw new Error("not found") }
+		throw new Error('not found') }
 
 	function main() { wrangling_check(window.location.pathname) }
 
@@ -56,16 +54,16 @@ function wrangling_keystrokes(window)
 		return (rect.top >= 0) && (rect.bottom <= window.innerHeight) }
 
 	function define_key(keystring, cb)
-		{ const keyparts = keystring.split("-")
+		{ const keyparts = keystring.split('-')
 		const modset = new Set(initial(keyparts))
 		let charcode = last(keyparts).charCodeAt(0)
 		if (charcode > 0b1111111)
-			throw new RangeError("character code is larger than 255")
-		if (modset.has("C"))
+			throw new RangeError('character code is larger than 255')
+		if (modset.has('C'))
 			charcode += 0b10000000000
-		if (modset.has("A"))
+		if (modset.has('A'))
 			charcode += 0b01000000000
-		if (modset.has("S"))
+		if (modset.has('S'))
 			charcode += 0b00100000000
 		keys.set(charcode, cb) }
 
@@ -90,7 +88,7 @@ function wrangling_keystrokes(window)
 		else return false }
 
 	function wrangling_check(x)
-		{ let y = x.match(new RegExp("^/tags/[^/]+/(.+)$"))
+		{ let y = x.match(new RegExp('^/tags/[^/]+/(.+)$'))
 		switch(true)
 		{ case x === '/tags/new':
 			new_tag_page()
@@ -116,99 +114,85 @@ function wrangling_keystrokes(window)
 		default: break }}
 
 	function edit_tag_page()
-		{ console.log("edit tag page activated")
-		set("save", $("p.submit.actions > input[name='commit']"))
-		set("fandom", $("input#tag_fandom_string_autocomplete"))
-		set("unwrangleable", $("#tag_unwrangleable"))
-		set("works", $("ul.navigation.actions:nth-of-type(2) > li > a"))
-		set("comments", $("p.navigation.actions > a"))
-		set("canonical", $("#tag_canonical"))
-		set('tagname', $('#tag_name'))
+		{ console.log('edit tag page activated')
+		const save = $('p.submit.actions > input[name="commit"]')
+		const fandom = $('input#tag_fandom_string_autocomplete')
+		const unwrangleable = $('#tag_unwrangleable')
+		const works = $('ul.navigation.actions:nth-of-type(2) > li > a')
+		const comments = $('p.navigation.actions > a')
+		const canonical = $('#tag_canonical')
+		const tagname = $('#tag_name')
+		const mergers = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/wrangle?page=1&show=mergers'
 		
-		define_key("A-s", commit_tag_edit)
-		define_key("A-e", focus_syn_bar)
-		define_key("A-f", focus_fandom_bar)
-		define_key("A-u", toggle_unwrangleable)
-		define_key("A-r", open_works)
-		define_key("A-m", open_comments)
-		define_key("A-i", toggle_canonical)
-		define_key("A-o", see_mergers)
-		define_key("A-n", tagname)
-
-		function see_mergers() { window.open(location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + "/wrangle?page=1&show=mergers", 1) }
-		function commit_tag_edit() { get("save").click() }
-		function focus_fandom_bar() { get("fandom").focus() }
-		function toggle_unwrangleable() { get("unwrangleable").click() }
-		function open_works() { window.open(get("works").href, 1) }
-		function focus_characters() { get("characters").focus() }
-		function go_to_synonym() { get("edit_synonym").click() }
-		function open_comments() { window.open(get("comments").href, 1) }
-		function toggle_canonical() { get("canonical").click() }
-		function allchars() { get("allchars").click() }
-		function tagname() { get('tagname').focus() }
+		define_key('A-s', K_(click)(save))
+		define_key('A-e', focus_syn_bar)
+		define_key('A-f', K_(focus)(fandom))
+		define_key('A-u', K_(click)(unwrangleable))
+		define_key('A-r', K_(open)(works.href))
+		define_key('A-m', K_(open)(comments.href))
+		define_key('A-i', K_(click)(canonical))
+		define_key('A-o', K_(open)(mergers))
+		define_key('A-n', K_(focus)(tagname))
 
 		if (relationship_check())
-			{ set("characters", $("#tag_character_string_autocomplete"))
-			define_key("A-c", focus_characters) }
+			{ const characters = $('#tag_character_string_autocomplete')
+			define_key('A-c', K_(focus)(characters)) }
 
 		if (synonym_check())
-			{ set("edit_synonym", $("p.actions:nth-of-type(2) > a"))
-			define_key("A-g", go_to_synonym) }
+			{ const edit_synonym = $('p.actions:nth-of-type(2) > a')
+			define_key('A-g', K_(click)(edit_synonym)) }
 
 		if (characters_check())
-			{ set("allchars", $("dd[title='Characters'] a.check_all"))
-			define_key("A-a", allchars) }
+			{ const allchars = $('dd[title="Characters"] a.check_all')
+			define_key('A-a', K_(click)(allchars)) }
 
 		function focus_syn_bar()
-			{ const x = $("#edit_tag fieldset:first-of-type .delete")
+			{ const x = $('#edit_tag fieldset:first-of-type .delete')
 			if (x) x.click()
-			$("input#tag_syn_string_autocomplete").focus() }
+			$('input#tag_syn_string_autocomplete').focus() }
 
 		function relationship_check()
-			{ const element = $("#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)")
-			return (element && element.innerHTML === "Relationship") }
+			{ const element = $('#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)')
+			return (element && element.innerHTML === 'Relationship') }
 
 		function synonym_check()
-			{ const element = $("p.actions:nth-of-type(2) > a")
+			{ const element = $('p.actions:nth-of-type(2) > a')
 			return Boolean(element) }
 
 		function characters_check()
-			{ const element = $("dd[title='Characters'] a.check_all")
+			{ const element = $('dd[title="Characters"] a.check_all')
 			return Boolean(element) }}
 
 	function wrangle_tags_page()
-		{ console.log("wrangle tags page activated")
-		document.styleSheets[0].insertRule(".focused { outline: 2px solid #D50000; }", 1)
-		set("save", $("dd.submit > input[name='commit']"))
-		set("next", $("li.next > a"))
-		set("previous", $("li.previous > a"))
-		set("inputbar", $("#fandom_string_autocomplete"))
-		set("rows", $$("tbody > tr"))
+		{ console.log('wrangle tags page activated')
+		document.styleSheets[0].insertRule('.focused { outline: 2px solid #D50000; }', 1)
+		const save = $('dd.submit > input[name="commit"]')
+		const next = $('li.next > a')
+		const previous = $('li.previous > a')
+		const inputbar = $('#fandom_string_autocomplete')
+
+		const rows = $$('tbody > tr')
 		let selected_row = null
+		const current_row = () => rows[selected_row]
 
-		define_key("A-s", commit_mass_wrangle)
-		define_key("A-e", focus_input_bar)
-		define_key("A-j", select_next_row)
-		define_key("A-k", select_previous_row)
-		define_key("A-w", open_edit_tag_page)
-		define_key("A-m", toggle_mass_wrangling_selected)
-		define_key("A-l", next_page)
-		define_key("A-h", previous_page)
-		define_key("A-r", open_works)
-		define_key("A-o", open_mergers_page)
-		define_key("A-c", open_comments)
-
-		const current_row = () => get("rows")[selected_row]
-
-		function commit_mass_wrangle() { get("save").click() }
-		function focus_input_bar() { get("inputbar").focus() }
+		define_key('A-s', K_(click)(save))
+		define_key('A-e', K_(focus)(inputbar))
+		define_key('A-j', select_next_row)
+		define_key('A-k', select_previous_row)
+		define_key('A-w', open_edit_tag_page)
+		define_key('A-m', toggle_mass_wrangling_selected)
+		define_key('A-l', K_(click)(next))
+		define_key('A-h', K_(click)(previous))
+		define_key('A-r', open_works)
+		define_key('A-o', open_mergers_page)
+		define_key('A-c', open_comments)
 
 		function deselect_row()
-			{ current_row().classList.remove("focused") }
+			{ current_row().classList.remove('focused') }
 
 		function select_row()
 			{ const element = current_row()
-			element.classList.add("focused")
+			element.classList.add('focused')
 			if (!is_in_view(element))
 				element.scrollIntoView(false) }
 
@@ -217,12 +201,12 @@ function wrangling_keystrokes(window)
 			select_row() }
 
 		function select_last_row()
-			{ selected_row = get("rows").length - 1
+			{ selected_row = rows.length - 1
 			select_row() }
 
 		function select_next_row()
 			{ if (selected_row === null) select_first_row()
-			else if (selected_row + 1 < get("rows").length) {
+			else if (selected_row + 1 < rows.length) {
 				deselect_row()
 				selected_row++
 				select_row() }}
@@ -236,48 +220,43 @@ function wrangling_keystrokes(window)
 
 		function open_edit_tag_page()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions li a", current_row())
-				.filter_one(href_ends_with("edit"))
-				.href
-			window.open(href, "_blank") }
+			pipe(
+				$$('ul.actions li a', current_row())
+				.filter_one(href_ends_with('edit'))
+				.href,
+				open) }
 
 		function open_mergers_page()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions li a", current_row())
-				.filter_one(href_ends_with("edit"))
+			pipe(
+				$$('ul.actions li a', current_row())
+				.filter_one(href_ends_with('edit'))
 				.href
 				.match(/(.+)\/edit/)[1] +
-				"/wrangle?page=1&show=mergers"
-			window.open(href, "_blank") }
+				'/wrangle?page=1&show=mergers',
+				open) }
 		
 		function open_comments()
 			{ if (selected_row === null) return
 			console.log('swag')
-			const href = $$("ul.actions li a", current_row())
-				.filter_one(href_ends_with("edit"))
+			pipe($$('ul.actions li a', current_row())
+				.filter_one(href_ends_with('edit'))
 				.href
 				.match(/(.+)\/edit/)[1] +
-				"/comments"
-			window.open(href, "_blank") }
+				'/comments',
+				open) }
 
 		function toggle_mass_wrangling_selected()
 			{ if (selected_row === null) return
-			$("th input[type='checkbox']", current_row()).click() }
+			$('th input[type="checkbox"]', current_row()).click() }
 
 		function open_works()
 			{ if (selected_row === null) return
-			const href = $$("ul.actions li a", current_row())
-				.filter_one(href_ends_with("works"))
-				.href
-			window.open(href, "_blank") }
-
-		function next_page()
-			{ const n = get("next")
-			if (n) n.click() }
-
-		function previous_page()
-			{ const p = get("previous")
-			if (p) p.click() }}
+			pipe(
+				$$('ul.actions li a', current_row())
+				.filter_one(href_ends_with('works'))
+				.href,
+				open) }}
 	
   	function tag_comments_page()
 		{ console.log('tag comments page activated')
@@ -310,7 +289,7 @@ function wrangling_keystrokes(window)
 
 	main() }
 
-if (document.readyState === "complete")
+if (document.readyState === 'complete')
 	wrangling_keystrokes(window)
 else
-	window.addEventListener("load", () => wrangling_keystrokes(window))
+	window.addEventListener('load', () => wrangling_keystrokes(window))
