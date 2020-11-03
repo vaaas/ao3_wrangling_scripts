@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.6.0
+// @version	0.6.1
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -30,7 +30,7 @@ function wrangling_keystrokes(window)
 	const focus = x => x.focus()
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
-	const pipe = (x, xs) => xs.reduce((a,b) => b(a), x)
+	const pipe = (x, ...xs) => xs.reduce((a,b) => b(a), x)
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
