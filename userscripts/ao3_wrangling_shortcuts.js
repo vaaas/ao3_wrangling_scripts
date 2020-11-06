@@ -17,6 +17,34 @@
 
 function wrangling_keystrokes(window)
 	{ 'use strict'
+
+	// if you wish to change the default key bindings, this is where you do it
+	const bindings =
+		{ down: 'A-j',
+		up: 'A-k',
+		previous: 'A-h',
+		next: 'A-l',
+		save: 'A-s',
+		focus_fandom: 'A-f',
+		focus_syn: 'A-e',
+		toggle_unwrangleable: 'A-u',
+		toggle_canonical: 'A-i',
+		open_works: 'A-r',
+		open_comments: 'A-p',
+		open_mergers: 'A-o',
+		focus_tag_name: 'A-n',
+		toggle_rel_helper: 'A-v',
+		focus_characters: 'A-c',
+		go_to_canonical: 'A-g',
+		select_characters: 'A-a',
+		edit_tag: 'A-w',
+		toggle_selection: 'A-m',
+		click_freeform: 'A-a',
+		click_relationship: 'A-r',
+		add: 'A-n',
+		remove: 'A-d',
+		toggle_rel_type: 'A-t', }
+
 	const K_ = a => b => () => a(b)
 	let keys = new Map()
 	const $ = (q, node=document) => node.querySelector(q)
@@ -43,6 +71,7 @@ function wrangling_keystrokes(window)
 	const log = x => console.log(x)
 	const join = s => x => x.join(s)
 	const filter = f => x => x.filter(f)
+	const pop = n => filter((x,i) => i !== n)
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -51,8 +80,6 @@ function wrangling_keystrokes(window)
 			{ if (i === a) return bv
 			else if (i === b) return av
 			else return x }) }
-
-	const pop = n => filter((x,i) => i !== n)
 
 	class Observable
 		{ constructor(x)
@@ -238,28 +265,28 @@ function wrangling_keystrokes(window)
 		const tagname = $('#tag_name')
 		const mergers = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/wrangle?page=1&show=mergers'
 
-		define_key('A-s', K_(click)(save))
-		define_key('A-e', focus_syn_bar)
-		define_key('A-f', K_(focus)(fandom))
-		define_key('A-u', K_(click)(unwrangleable))
-		define_key('A-r', K_(open)(works.href))
-		define_key('A-m', K_(open)(comments.href))
-		define_key('A-i', K_(click)(canonical))
-		define_key('A-o', K_(open)(mergers))
-		define_key('A-n', K_(focus)(tagname))
+		define_key(bindings.save, K_(click)(save))
+		define_key(bindings.focus_syn, focus_syn_bar)
+		define_key(bindings.focus_fandom, K_(focus)(fandom))
+		define_key(bindings.toggle_unwrangleable, K_(click)(unwrangleable))
+		define_key(bindings.open_works, K_(open)(works.href))
+		define_key(bindings.open_comments, K_(open)(comments.href))
+		define_key(bindings.toggle_canonical, K_(click)(canonical))
+		define_key(bindings.open_mergers, K_(open)(mergers))
+		define_key(bindings.focus_tag_name, K_(focus)(tagname))
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
-			define_key('A-v', rel_helper)
-			define_key('A-c', K_(focus)(characters)) }
+			define_key(bindings.toggle_rel_helper, rel_helper)
+			define_key(bindings.focus_characters, K_(focus)(characters)) }
 
 		if (synonym_check())
 			{ const edit_synonym = $('p.actions:nth-of-type(2) > a')
-			define_key('A-g', K_(click)(edit_synonym)) }
+			define_key(bindings.go_to_canonical, K_(click)(edit_synonym)) }
 
 		if (characters_check())
 			{ const allchars = $('dd[title="Characters"] a.check_all')
-			define_key('A-a', K_(click)(allchars)) }
+			define_key(bindings.select_characters, K_(click)(allchars)) }
 
 		function focus_syn_bar()
 			{ const x = $('#edit_tag fieldset:first-of-type .delete')
@@ -290,17 +317,17 @@ function wrangling_keystrokes(window)
 		let selected_row = null
 		const current_row = () => rows[selected_row]
 
-		define_key('A-s', K_(click)(save))
-		define_key('A-e', K_(focus)(inputbar))
-		define_key('A-j', select_next_row)
-		define_key('A-k', select_previous_row)
-		define_key('A-w', open_edit_tag_page)
-		define_key('A-m', toggle_mass_wrangling_selected)
-		define_key('A-l', K_(click)(next))
-		define_key('A-h', K_(click)(previous))
-		define_key('A-r', open_works)
-		define_key('A-o', open_mergers_page)
-		define_key('A-c', open_comments)
+		define_key(bindings.save, K_(click)(save))
+		define_key(bindings.focus_fandom, K_(focus)(inputbar))
+		define_key(bindings.down, select_next_row)
+		define_key(bindings.up, select_previous_row)
+		define_key(bindings.edit_tag, open_edit_tag_page)
+		define_key(bindings.toggle_selection, toggle_mass_wrangling_selected)
+		define_key(bindings.next, K_(click)(next))
+		define_key(bindings.previous, K_(click)(previous))
+		define_key(bindings.open_works, open_works)
+		define_key(bindings.open_mergers, open_mergers_page)
+		define_key(bindings.open_comments, open_comments)
 
 		function deselect_row()
 			{ current_row().classList.remove('focused') }
@@ -380,8 +407,8 @@ function wrangling_keystrokes(window)
 
 		window.requestAnimationFrame(K_(focus)(textarea))
 
-		define_key('A-s', K_(click)(submit))
-		define_key('A-w', K_(open)(href)) }
+		define_key(bindings.save, K_(click)(submit))
+		define_key(bindings.edit_tag, K_(open)(href)) }
 
 	function new_tag_page()
 		{ console.log('new tag page activated')
@@ -393,13 +420,13 @@ function wrangling_keystrokes(window)
 		const freeform = $('#tag_type_freeform')
 		const submit = $('p.submit.actions input[type="submit"]')
 
-		define_key('A-e', K_(focus)(name))
-		define_key('A-i', K_(click)(canonical))
-		define_key('A-f', K_(click)(fandom))
-		define_key('A-c', K_(click)(character))
-		define_key('A-r', K_(click)(relationship))
-		define_key('A-a', K_(click)(freeform))
-		define_key('A-s', K_(click)(submit)) }
+		define_key(bindings.focus_syn, K_(focus)(name))
+		define_key(bindings.toggle_canonical, K_(click)(canonical))
+		define_key(bindings.focus_fandom, K_(click)(fandom))
+		define_key(bindings.focus_characters, K_(click)(character))
+		define_key(bindings.click_relationship, K_(click)(relationship))
+		define_key(bindings.click_freeform, K_(click)(freeform))
+		define_key(bindings.save, K_(click)(submit)) }
 
 	function rel_helper()
 		{ const keys_cache = keys
@@ -410,7 +437,7 @@ function wrangling_keystrokes(window)
 
 		let focused = null
 		const new_input = x => new E('input')
-			.style('max-width: 50em; margin: auto; margin-bottom: 1em; margin-top: 1em; display: block;')
+			.style('max-width: 50em; margin: 1em; display: block;')
 			.value(x.get())
 			.focus(e =>
 				{ focused = e.target
@@ -446,15 +473,15 @@ function wrangling_keystrokes(window)
 		insertBefore(fieldset.element, $('#edit_tag fieldset:nth-of-type(2)'))
 		editbox.element.firstElementChild.focus()
 
-		define_key('A-s', commit_rel)
-		define_key('A-v', cancel)
-		define_key('A-n', append_char)
-		define_key('A-d', remove_char)
-		define_key('A-j', focus_next)
-		define_key('A-k', focus_prev)
-		define_key('A-h', move_before)
-		define_key('A-l', move_after)
-		define_key('A-t', toggle_rel)
+		define_key(bindings.save, commit_rel)
+		define_key(bindings.toggle_rel_helper, cancel)
+		define_key(bindings.add, append_char)
+		define_key(bindings.remove, remove_char)
+		define_key(bindings.down, focus_next)
+		define_key(bindings.up, focus_prev)
+		define_key(bindings.previous, move_before)
+		define_key(bindings.next, move_after)
+		define_key(bindings.toggle_rel_type, toggle_rel)
 
 		function toggle_rel()
 			{ reltype.map(x => x === '/' ? ' & ' : '/') }
