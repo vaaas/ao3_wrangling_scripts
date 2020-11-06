@@ -46,11 +46,11 @@ alt-m | open comments page
 alt-u | toggle unwrangeable checkbox
 alt-i | toggle canonical checkbox
 alt-c | focus characters autocomplete bar (if relationship tag)
-alt-g | go to the synonym page (if exists)
+alt-g | go to the canonical's page (if it exists)
 alt-a | select all characters in a relationship tag (if any exist)
 alt-o | open tag mergers
 alt-n | focus the tag's name
-alt-v | open the rel helper
+alt-v | open the rel helper (if relationship tag)
 
 #### List of bindings — Rel Helper
 

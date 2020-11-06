@@ -132,8 +132,8 @@ function wrangling_keystrokes(window)
 				f(x)
 			return this }}
 
-	class Options extends E {
-		constructor(options)
+	class Options extends E
+		{ constructor(options)
 			{ super('select')
 			this.children(
 				Object.entries(options).map(([text, value]) =>
