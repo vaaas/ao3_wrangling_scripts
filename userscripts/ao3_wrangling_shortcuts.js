@@ -31,6 +31,61 @@ function wrangling_keystrokes(window)
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
 	const pipe = (x, ...xs) => xs.reduce((a,b) => b(a), x)
+	const map = f => x => x.map(x)
+	const split = d => x => x.split(d)
+	const reduce = (f, initial) => x => x.reduce(f, initial)
+	const merge = (a, b) => [...a, ...b]
+	
+	class Observable
+		{ constructor(x)
+			{ this.x = x
+			this.watchers = new Set() }
+		map(f)
+			{ this.x = f(this.x)
+			this.notify()
+			return this }
+		notify()
+			{ this.watchers.forEach(f => f(this.x))
+			return this }
+		watch(f)
+			{ this.watchers.add(f)
+			return this }
+		unwatch(f)
+			{ this.watchers.delete(f)
+			return this }}
+	class E
+		{ constructor(x)
+			{ this.element = document.createElement(x)
+			this.watches = new Map()
+			this.children = new Set() }
+		child(x)
+			{ x.parent = this
+			this.children.add(x)
+			this.element.appendChild(x.element)
+			return this }
+		remove(x)
+			{ if (this.parent)
+				this.parent.children.delete(this)
+			this.element.remove()
+			this.watches.forEach((f, o) => o.unwatch(f))
+			return this }
+		on(o, f)
+			{ g = x => f(x, this)
+			o.watch(g)
+			if (this.watches.has(o))
+				this.watches.get(o).push(g)
+			else
+				this.watches.set(o, [g])
+			return this }
+		value(x)
+			{ this.element.value = x
+			return }
+		focus(f)
+			{ this.element.onfocus = f
+			return this }
+		style(x)
+			{ this.element.style = x
+			return this }}
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
@@ -133,6 +188,7 @@ function wrangling_keystrokes(window)
 		define_key('A-i', K_(click)(canonical))
 		define_key('A-o', K_(open)(mergers))
 		define_key('A-n', K_(focus)(tagname))
+		define_key('A-h', rel_helper)
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
@@ -286,6 +342,31 @@ function wrangling_keystrokes(window)
 		define_key('A-r', K_(click)(relationship))
 		define_key('A-a', K_(click)(freeform))
 		define_key('A-s', K_(click)(submit)) }
+
+	function rel_helper()
+		{ const keys_cache = keys
+		keys = new Map()
+
+		const modal = document.createElement('div')
+		let current = 
+		const tags = pipe($('#tag_name').value,
+			split('/'),
+			map(split('&')),
+			reduce(merge, []),
+			map(x => {
+				const e = document.createElement('input')
+				e.value = x
+				e.on
+			})
+		
+		
+		define_key('A-s', commit_rel)
+		define_key('A-q', cancel)
+		define_key('A-n', append_char)
+		define_key('A-j', focus_next)
+		define_key('A-k', focus_prev)
+		define_key('A-h', move_before)
+		define_key('A-l', move_after) }
 
 	main() }
 
