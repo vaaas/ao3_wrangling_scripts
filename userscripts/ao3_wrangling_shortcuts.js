@@ -167,10 +167,10 @@ function wrangling_keystrokes(window)
 				Object.entries(options).map(([text, value]) =>
 					new E('option').text(text).value(value))) }
 		bind(o)
-			{ this.element.onchange = () => o.map(this.element.value)
-			o.watch(x =>
-				{ if (this.element.value === x) return
-				this.element.value = x })
+			{ this.element.onchange = () => o.map(just(this.element.value))
+			this.on(o, (x, me) =>
+				{ if (me.element.value === x) return
+				me.element.value = x })
 			return this }}
 
 	Array.prototype.filter_one = function(cb)
