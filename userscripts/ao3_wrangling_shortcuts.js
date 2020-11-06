@@ -21,7 +21,7 @@ function wrangling_keystrokes(window)
 	const K_ = a => b => () => a(b) // kestrel once removed
 
 	// utility
-	const keys = new Map()
+	let keys = new Map()
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const href_ends_with = x => e => e.href.endsWith(x)
@@ -31,11 +31,32 @@ function wrangling_keystrokes(window)
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
 	const pipe = (x, ...xs) => xs.reduce((a,b) => b(a), x)
-	const map = f => x => x.map(x)
+	const map = f => x => x.map(f)
+	const mapping = x => f => x.map(f)
 	const split = d => x => x.split(d)
 	const reduce = (f, initial) => x => x.reduce(f, initial)
 	const merge = (a, b) => [...a, ...b]
+	const each = f => x => x.forEach(f)
+	const N = o => x => new o(x)
+	const just = x => () => x
+	const IF = (clause, then) => x => clause(x) ? then(x) : undefined
+	const get = x => x.get()
+	const insertBefore = (what, where) => where.parentNode.insertBefore(what, where)
+	const flatten = x => x.flat()
+	const log = x => console.log(x)
+	const join = s => x => x.join(s)
+	const filter = f => x => x.filter(f)
 	
+	const swap = (a, b) => x =>
+		{ const av = x[a]
+		const bv = x[b]
+		return x.map((x, i) =>
+			{ if (i === a) return bv
+			else if (i === b) return av
+			else return x }) }
+	
+	const pop = n => filter((x,i) => i !== n)
+
 	class Observable
 		{ constructor(x)
 			{ this.x = x
@@ -44,6 +65,7 @@ function wrangling_keystrokes(window)
 			{ this.x = f(this.x)
 			this.notify()
 			return this }
+		get() { return this.x }
 		notify()
 			{ this.watchers.forEach(f => f(this.x))
 			return this }
@@ -53,24 +75,33 @@ function wrangling_keystrokes(window)
 		unwatch(f)
 			{ this.watchers.delete(f)
 			return this }}
+
 	class E
 		{ constructor(x)
 			{ this.element = document.createElement(x)
 			this.watches = new Map()
-			this.children = new Set() }
+			this._children = new Set() }
 		child(x)
 			{ x.parent = this
-			this.children.add(x)
+			this._children.add(x)
 			this.element.appendChild(x.element)
 			return this }
+		children(xs)
+			{ this.clear()
+			xs.forEach(x => this.child(x))
+			return this }
+		clear()
+			{ this._children.forEach(x => x.remove())
+			return this }
 		remove(x)
-			{ if (this.parent)
-				this.parent.children.delete(this)
+			{ this.clear()
+			if (this.parent)
+				this.parent._children.delete(this)
 			this.element.remove()
 			this.watches.forEach((f, o) => o.unwatch(f))
 			return this }
 		on(o, f)
-			{ g = x => f(x, this)
+			{ const g = x => f(x, this)
 			o.watch(g)
 			if (this.watches.has(o))
 				this.watches.get(o).push(g)
@@ -79,13 +110,23 @@ function wrangling_keystrokes(window)
 			return this }
 		value(x)
 			{ this.element.value = x
-			return }
+			return this }
 		focus(f)
 			{ this.element.onfocus = f
 			return this }
+		unfocus(f)
+			{ this.element.addEventListener('focusout', f)
+			return this }
 		style(x)
 			{ this.element.style = x
-			return this }}
+			return this }
+		input(f)
+			{ this.element.oninput = f 
+			return this }
+		find(f)
+			{ for (const x of this._children.values())
+				if (f(x)) return x
+			return null }}
 
 	Array.prototype.filter_one = function(cb)
 		{ for (let i = 0, len = this.length; i < len; i++)
@@ -170,6 +211,7 @@ function wrangling_keystrokes(window)
 
 	function edit_tag_page()
 		{ console.log('edit tag page activated')
+		document.styleSheets[0].insertRule('.focused { outline: 2px solid #D50000; }', 1)
 		const save = $('p.submit.actions > input[name="commit"]')
 		const fandom = $('input#tag_fandom_string_autocomplete')
 		const unwrangleable = $('#tag_unwrangleable')
@@ -188,10 +230,10 @@ function wrangling_keystrokes(window)
 		define_key('A-i', K_(click)(canonical))
 		define_key('A-o', K_(open)(mergers))
 		define_key('A-n', K_(focus)(tagname))
-		define_key('A-h', rel_helper)
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
+			define_key('A-h', rel_helper)
 			define_key('A-c', K_(focus)(characters)) }
 
 		if (synonym_check())
@@ -294,7 +336,6 @@ function wrangling_keystrokes(window)
 		
 		function open_comments()
 			{ if (selected_row === null) return
-			console.log('swag')
 			pipe($$('ul.actions li a', current_row())
 				.filter_one(href_ends_with('edit'))
 				.href
@@ -346,27 +387,96 @@ function wrangling_keystrokes(window)
 	function rel_helper()
 		{ const keys_cache = keys
 		keys = new Map()
+		
+		IF(Boolean, click)($('#edit_tag fieldset:first-of-type .delete'))
+		const rel_field = $('input#tag_syn_string_autocomplete')
+		
+		let focused = null
+		const new_input = x => new E('input')
+			.style('max-width: 50em; margin: auto; margin-bottom: 1em; margin-top: 1em; display: block;')
+			.value(x.get())
+			.focus(e =>
+				{ focused = e.target
+				e.target.classList.add('focused') })
+			.unfocus(e =>
+				{ if (focused = e.target) focused = null
+				e.target.classList.remove('focused') })
+			.input(e => x.map(just(e.target.value)))
+		const parts = new Observable([])
 
-		const modal = document.createElement('div')
-		let current = 
-		const tags = pipe($('#tag_name').value,
+		const editbox = new E('fieldset')
+			.on(parts, (x, me) => {
+				pipe(x,
+					map(new_input),
+					x => me.children(x))
+				focused = null })
+
+		pipe($('#tag_name').value,
 			split('/'),
 			map(split('&')),
-			reduce(merge, []),
-			map(x => {
-				const e = document.createElement('input')
-				e.value = x
-				e.on
-			})
-		
-		
+			flatten,
+			map(N(Observable)),
+			just,
+			mapping(parts))
+			
+		insertBefore(editbox.element, $('#edit_tag fieldset:nth-of-type(2)'))
+		editbox.element.firstElementChild.focus()
+
 		define_key('A-s', commit_rel)
 		define_key('A-q', cancel)
 		define_key('A-n', append_char)
+		define_key('A-d', remove_char)
 		define_key('A-j', focus_next)
 		define_key('A-k', focus_prev)
 		define_key('A-h', move_before)
-		define_key('A-l', move_after) }
+		define_key('A-l', move_after)
+		
+		function commit_rel()
+			{ pipe(parts,
+			get,
+			map(get),
+			join('/'),
+			x => rel_field.value = x)
+			cancel() }
+		
+		function cancel()
+			{ editbox.remove()
+			keys = keys_cache }
+		
+		function append_char()
+			{ parts.map(x => [...x, new Observable('')])
+			editbox.element.lastElementChild.focus() }
+		
+		function remove_char()
+			{ if (!focused || parts.get().length <= 1) return
+			const i = parts.get().findIndex(x => x.get() === focused.value)
+			if (i === -1) return
+			parts.map(pop(i))
+			editbox.element.children[parts.get().length === i ? i-1 : i].focus() }
+		
+		function focus_next()
+			{ if (focused)
+				IF(Boolean, focus)(focused.nextSibling)
+			else editbox.element.firstElementChild.focus() }
+		
+		function focus_prev()
+			{ if (focused)
+				IF(Boolean, focus)(focused.previousSibling)
+			else editbox.element.lastElementChild.focus() }
+		
+		function move_before()
+			{ if (!focused) return
+			const i = parts.get().findIndex(x => x.get() === focused.value)
+			if (i === -1 || i === 0) return
+			parts.map(swap(i, i-1))
+			editbox.element.children[i-1].focus() }
+		
+		function move_after()
+			{ if (!focused) return
+			const i = parts.get().findIndex(x => x.get() === focused.value)
+			if (i === -1 || i+1 === parts.get().length) return
+			parts.map(swap(i, i+1))
+			editbox.element.children[i+1].focus() } }
 
 	main() }
 
