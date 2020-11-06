@@ -250,7 +250,7 @@ function wrangling_keystrokes(window)
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
-			define_key('A-h', rel_helper)
+			define_key('C-h', rel_helper)
 			define_key('A-c', K_(focus)(characters)) }
 
 		if (synonym_check())
@@ -446,15 +446,15 @@ function wrangling_keystrokes(window)
 		insertBefore(fieldset.element, $('#edit_tag fieldset:nth-of-type(2)'))
 		editbox.element.firstElementChild.focus()
 
-		define_key('A-s', commit_rel)
-		define_key('A-q', cancel)
-		define_key('A-n', append_char)
-		define_key('A-d', remove_char)
-		define_key('A-j', focus_next)
-		define_key('A-k', focus_prev)
-		define_key('A-h', move_before)
-		define_key('A-l', move_after)
-		define_key('A-t', toggle_rel)
+		define_key('C-s', commit_rel)
+		define_key('C-q', cancel)
+		define_key('C-n', append_char)
+		define_key('C-d', remove_char)
+		define_key('C-j', focus_next)
+		define_key('C-k', focus_prev)
+		define_key('C-h', move_before)
+		define_key('C-l', move_after)
+		define_key('C-t', toggle_rel)
 
 		function toggle_rel()
 			{ reltype.map(x => x === '/' ? ' & ' : '/') }
