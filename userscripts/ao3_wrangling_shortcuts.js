@@ -37,6 +37,7 @@ function wrangling_keystrokes(window)
 		focus_characters: 'A-c',
 		go_to_canonical: 'A-g',
 		select_characters: 'A-a',
+		select_fandoms: 'A-S-a',
 		edit_tag: 'A-w',
 		toggle_selection: 'A-m',
 		click_freeform: 'A-a',
@@ -180,7 +181,7 @@ function wrangling_keystrokes(window)
 
 	function main() { wrangling_check(window.location.pathname) }
 
-	function key_pressed (keyevent)
+	function key_pressed(keyevent)
 		{ const cb = valid_shortcut_p(keyevent)
 		if (cb === false) return true
 		else
@@ -189,14 +190,14 @@ function wrangling_keystrokes(window)
 			keyevent.stopPropagation()
 			return false }}
 
-	function is_in_view (el)
+	function is_in_view(el)
 		{ const rect = el.getBoundingClientRect()
 		return (rect.top >= 0) && (rect.bottom <= window.innerHeight) }
 
 	function define_key(keystring, cb)
 		{ const keyparts = keystring.split('-')
 		const modset = new Set(initial(keyparts))
-		let charcode = last(keyparts).charCodeAt(0)
+		let charcode = last(keyparts).charCodeAt(0)-32
 		if (charcode > 0b1111111)
 			throw new RangeError('character code is larger than 255')
 		if (modset.has('C'))
@@ -210,7 +211,7 @@ function wrangling_keystrokes(window)
 	function keyevent_to_bitmap(event)
 		{ if (event.key.length > 1)
 			return null
-		let charcode = event.key.charCodeAt(0)
+		let charcode = event.keyCode
 		if (charcode > 0b11111111)
 			return null
 		if (event.ctrlKey)
@@ -274,6 +275,7 @@ function wrangling_keystrokes(window)
 		define_key(bindings.toggle_canonical, K_(click)(canonical))
 		define_key(bindings.open_mergers, K_(open)(mergers))
 		define_key(bindings.focus_tag_name, K_(focus)(tagname))
+		define_key(bindings.select_fandoms, K_(click)($('dd[title="Fandoms"] a.check_all')))
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
