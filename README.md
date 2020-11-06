@@ -50,6 +50,25 @@ alt-g | go to the synonym page (if exists)
 alt-a | select all characters in a relationship tag (if any exist)
 alt-o | open tag mergers
 alt-n | focus the tag's name
+alt-v | open the rel helper
+
+#### List of bindings — Rel Helper
+
+The rel helper splits up the rel into its component characters so you can edit the individual characters faster and reorder them with shortcuts. This is mainly useful for rels with very many characters.
+
+While, active, only the rel helper's bindings work.
+
+Binding | Behaviour
+--- | ---
+alt-j | focus lower character
+alt-k | focus upper character
+alt-h | move character up in order
+alt-l | move character down in order
+alt-n | add a new empty character field
+alt-d | delete the current focused character field
+alt-t | toggle between / and & rels
+alt-s | commit the edits
+alt-v | quit without commiting
 
 ### List of bindings — Tag listings
 
