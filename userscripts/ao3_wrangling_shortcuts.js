@@ -45,9 +45,13 @@ function wrangling_keystrokes(window)
 		add: 'A-n',
 		remove: 'A-d',
 		toggle_rel_type: 'A-t', }
+		
+	let keys = new Map()
 
 	const K_ = a => b => () => a(b)
-	let keys = new Map()
+	const D1 = f => filter => a => b => f(filter(a))(filter(b))
+	const D2 = f => fa => fb => a => b => f(fa(a))(fb(b))
+	const T = x => f => f(x)
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const href_ends_with = x => e => e.href.endsWith(x)
@@ -56,23 +60,32 @@ function wrangling_keystrokes(window)
 	const focus = x => x.focus()
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
-	const pipe = (x, ...xs) => xs.reduce((a,b) => b(a), x)
+	const P = (x, ...xs) => xs.reduce((a,b) => b(a), x)
+	const PP = (...xs) => x => xs.reduce((a,b) => b(a), x)
 	const map = f => x => x.map(f)
-	const mapping = x => f => x.map(f)
 	const split = d => x => x.split(d)
-	const reduce = (f, initial) => x => x.reduce(f, initial)
-	const merge = (a, b) => [...a, ...b]
-	const each = f => x => x.forEach(f)
 	const N = o => x => new o(x)
 	const just = x => () => x
-	const IF = (clause, then) => x => clause(x) ? then(x) : undefined
 	const get = x => x.get()
 	const insertBefore = (what, where) => where.parentNode.insertBefore(what, where)
 	const flatten = x => x.flat()
 	const log = x => console.log(x)
 	const join = s => x => x.join(s)
 	const filter = f => x => x.filter(f)
-	const pop = n => filter((x,i) => i !== n)
+	const sans = n => filter((x,i) => i !== n)
+	const findIndex = f => xs => rejecter(-1)(xs.findIndex(f))
+	const find = f => xs => rejecter(undefined)(xs.find(f))
+	const rejecter = bad => x => x === bad ? Promise.reject(null) : Promise.resolve(x)
+	const then = f => p => p.then(f)
+	const otherwise = f => p => p.catch(f)
+	const pluck = k => x => x[k]
+	const tap = f => x => { f(x) ; return x }
+	const add = a => b => a + b
+	const length = x => x.length
+	const is = a => b => a === b
+	const value = x => x.value
+	Promise.nothing = () => Promise.reject(null)
+	Promise.of = x => Promise.resolve(x)
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -172,12 +185,6 @@ function wrangling_keystrokes(window)
 				{ if (me.element.value === x) return
 				me.element.value = x })
 			return this }}
-
-	Array.prototype.filter_one = function(cb)
-		{ for (let i = 0, len = this.length; i < len; i++)
-			if (cb(this[i], i, this))
-				return this[i]
-		throw new Error('not found') }
 
 	function main() { wrangling_check(window.location.pathname) }
 
@@ -364,17 +371,17 @@ function wrangling_keystrokes(window)
 
 		function open_edit_tag_page()
 			{ if (selected_row === null) return
-			pipe(
+			P(
 				$$('ul.actions li a', current_row())
-				.filter_one(href_ends_with('edit'))
+				.find(href_ends_with('edit'))
 				.href,
 				open) }
 
 		function open_mergers_page()
 			{ if (selected_row === null) return
-			pipe(
+			P(
 				$$('ul.actions li a', current_row())
-				.filter_one(href_ends_with('edit'))
+				.find(href_ends_with('edit'))
 				.href
 				.match(/(.+)\/edit/)[1] +
 				'/wrangle?page=1&show=mergers',
@@ -382,8 +389,8 @@ function wrangling_keystrokes(window)
 
 		function open_comments()
 			{ if (selected_row === null) return
-			pipe($$('ul.actions li a', current_row())
-				.filter_one(href_ends_with('edit'))
+			P($$('ul.actions li a', current_row())
+				.find(href_ends_with('edit'))
 				.href
 				.match(/(.+)\/edit/)[1] +
 				'/comments',
@@ -395,9 +402,9 @@ function wrangling_keystrokes(window)
 
 		function open_works()
 			{ if (selected_row === null) return
-			pipe(
+			P(
 				$$('ul.actions li a', current_row())
-				.filter_one(href_ends_with('works'))
+				.find(href_ends_with('works'))
 				.href,
 				open) }}
 
@@ -431,21 +438,22 @@ function wrangling_keystrokes(window)
 		define_key(bindings.save, K_(click)(submit)) }
 
 	function rel_helper()
-		{ const keys_cache = keys
+		{ console.log('rel helper activated')
+		const keys_cache = keys
 		keys = new Map()
 
-		IF(Boolean, click)($('#edit_tag fieldset:first-of-type .delete'))
+		rejecter(null)($('#edit_tag fieldset:first-of-type .delete')).then(click)
 		const rel_field = $('input#tag_syn_string_autocomplete')
 
-		let focused = null
+		let focused = Promise.nothing()
 		const new_input = x => new E('input')
 			.style('max-width: 50em; margin: 1em; display: block;')
 			.value(x.get())
 			.focus(e =>
-				{ focused = e.target
+				{ focused = Promise.of(e.target)
 				e.target.classList.add('focused') })
 			.unfocus(e =>
-				{ if (focused === e.target) focused = null
+				{ if (focused === e.target) focused = Promise.nothing()
 				e.target.classList.remove('focused') })
 			.input(e => x.map(just(e.target.value)))
 		const parts = new Observable([])
@@ -453,10 +461,10 @@ function wrangling_keystrokes(window)
 
 		const editbox = new E('div')
 			.on(parts, (x, me) => {
-				pipe(x,
+				P(x,
 					map(new_input),
 					x => me.children(x))
-				focused = null })
+				focused = Promise.nothing() })
 
 		const fieldset = new E('fieldset')
 			.child(new Options({ 'romantic': '/', 'platonic': ' & ' })
@@ -464,13 +472,14 @@ function wrangling_keystrokes(window)
 				.style('max-width: 10em; margin: 1em; display: block;'))
 			.child(editbox)
 
-		pipe($('#tag_name').value,
+		P($('#tag_name').value,
 			split('/'),
 			map(split('&')),
 			flatten,
 			map(N(Observable)),
 			just,
-			mapping(parts))
+			map,
+			T(parts))
 	
 		insertBefore(fieldset.element, $('#edit_tag fieldset:nth-of-type(2)'))
 		editbox.element.firstElementChild.focus()
@@ -489,7 +498,7 @@ function wrangling_keystrokes(window)
 			{ reltype.map(x => x === '/' ? ' & ' : '/') }
 
 		function commit_rel()
-			{ pipe(parts,
+			{ P(parts,
 			get,
 			map(get),
 			join(reltype.get()),
@@ -505,35 +514,45 @@ function wrangling_keystrokes(window)
 			editbox.element.lastElementChild.focus() }
 
 		function remove_char()
-			{ if (!focused || parts.get().length <= 1) return
-			const i = parts.get().findIndex(x => x.get() === focused.value)
-			if (i === -1) return
-			parts.map(pop(i))
-			editbox.element.children[parts.get().length === i ? i-1 : i].focus() }
+			{ if (parts.get().length <= 1) return
+			P(focused,
+				then(focused =>
+					P(parts.get(),
+						findIndex(D2(is)(value)(get)(focused)))),
+				then(
+					tap(PP(sans, map, T(parts))),
+					PP(x => parts.get().length === x ? x - 1 : x,
+						pluck,
+						T(editbox.element.children),
+						focus))) }
 
 		function focus_next()
-			{ if (focused)
-				IF(Boolean, focus)(focused.nextSibling)
-			else editbox.element.firstElementChild.focus() }
+			{ P(focused,
+				then(PP(pluck('nextSibling'), rejecter(null))),
+				then(focus),
+				otherwise(()=>editbox.element.firstElementChild.focus())) }
 
 		function focus_prev()
-			{ if (focused)
-				IF(Boolean, focus)(focused.previousSibling)
-			else editbox.element.lastElementChild.focus() }
+			{ P(focused,
+				then(PP(pluck('previousSibling'), rejecter(null))),
+				then(focus),
+				otherwise(()=>editbox.element.lastElementChild.focus())) }
 
 		function move_before()
-			{ if (!focused) return
-			const i = parts.get().findIndex(x => x.get() === focused.value)
-			if (i === -1 || i === 0) return
-			parts.map(swap(i, i-1))
-			editbox.element.children[i-1].focus() }
+			{ P(focused,
+				then(PP(D2(is)(value)(get), findIndex, T(parts.get()))),
+				then(rejecter(0)),
+				then(PP(
+					tap(x => parts.map(swap(x, x-1))),
+					PP(add(-1), pluck, T(editbox.element.children), focus)))) }
 
 		function move_after()
-			{ if (!focused) return
-			const i = parts.get().findIndex(x => x.get() === focused.value)
-			if (i === -1 || i+1 === parts.get().length) return
-			parts.map(swap(i, i+1))
-			editbox.element.children[i+1].focus() } }
+			{ P(focused,
+				then(PP(D2(is)(value)(get), findIndex, T(parts.get()))),
+				then(P(parts, get, length, add(-1), rejecter)),
+				then(PP(
+					tap(x => parts.map(swap(x, x+1))),
+					PP(add(1), pluck, T(editbox.element.children), focus)))) } }
 
 	main() }
 
