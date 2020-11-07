@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.7.0
+// @version	0.7.1
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -304,6 +304,7 @@ function wrangling_keystrokes(window)
 		const comments = $('p.navigation.actions > a')
 		const canonical = $('#tag_canonical')
 		const tagname = $('#tag_name')
+		const all_fandoms = $('dd[title="Fandoms"] a.check_all')
 		const mergers = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/wrangle?page=1&show=mergers'
 
 		define_key(bindings.save, K_(click)(save))
@@ -315,7 +316,7 @@ function wrangling_keystrokes(window)
 		define_key(bindings.toggle_canonical, K_(click)(canonical))
 		define_key(bindings.open_mergers, K_(open)(mergers))
 		define_key(bindings.focus_tag_name, K_(focus)(tagname))
-		define_key(bindings.select_fandoms, K_(click)($('dd[title="Fandoms"] a.check_all')))
+		define_key(bindings.select_fandoms, K_(click)(all_fandoms))
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')

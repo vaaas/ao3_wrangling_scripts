@@ -30,7 +30,7 @@ Keyboard shortcuts for the AO3's wrangling interface
 
 ### Installation
 
-Point tampermonkey / greasemonkey / whatever you're using to [this URL](https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js). Script will also work if you inject it with Firefox's Custom Style Script. It won't interfere with your normal AO3 browsing experience.
+Point tampermonkey / greasemonkey / whatever you're using to [this URL](https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js). It won't interfere with your normal AO3 browsing experience.
 
 I've been using it to wrangle for some time now and it hasn't nuked my PC but nevertheless it's provided as-is and I'm not responsible if it gives you antibiotic-resistant colon infections.
 
@@ -42,12 +42,13 @@ alt-s | commit edits
 alt-e | focus synonym autocomplete bar. if the tag is already a synonym, remove the synonym and then focus the bar
 alt-f | focus fandom autocomplete bar
 alt-r | open works listing
-alt-m | open comments page
+alt-p | open comments page
 alt-u | toggle unwrangeable checkbox
 alt-i | toggle canonical checkbox
 alt-c | focus characters autocomplete bar (if relationship tag)
 alt-g | go to the canonical's page (if it exists)
 alt-a | select all characters in a relationship tag (if any exist)
+alt-shift-a | select all fandoms
 alt-o | open tag mergers
 alt-n | focus the tag's name
 alt-v | open the rel helper (if relationship tag)
@@ -75,7 +76,7 @@ alt-v | quit without commiting
 Binding | Behaviour
 --- | ---
 alt-s | commit mass wrangling
-alt-e | focus fandom autocomplete bar
+alt-f | focus fandom autocomplete bar
 alt-j | focus next tag
 alt-k | focus previous tag
 alt-w | open tag editing page
@@ -84,17 +85,18 @@ alt-r | open works listing
 alt-h | go to previous page
 alt-l | go to next page
 alt-o | open tag mergers
-alt-c | open tag comments
+alt-p | open tag comments
 
 ### List of bindings — Tag comments
 Binding | Behaviour
 --- | ---
 alt-s | submit comment
+alt-w | edit tag
 
 ### List of bindings — New tag
 Binding | Behaviour
 --- | ---
-alt-e | focus tag name
+alt-n | focus tag name
 alt-i | toggle canonical
 alt-f | fandom tag
 alt-r | relationship tag
@@ -104,7 +106,7 @@ alt-s | submit
 
 ### Changing bindings
 
-There's no pretty GUI for changing the bindings, but you can search for "define_key" and change the second argument, which defines the key sequence. Only Alt prefixes are used by default ("A-") but you should be able to use CTRL and Shift as well ("C-" / "S-").
+There's no pretty GUI for changing the bindings, but the bindings and the accepted format are defined near the top of the script. Edit the bindings object and you should be good to go!
 
 # Utilities
 
