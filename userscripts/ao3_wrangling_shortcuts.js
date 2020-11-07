@@ -19,6 +19,11 @@ function wrangling_keystrokes(window)
 	{ 'use strict'
 
 	// if you wish to change the default key bindings, this is where you do it
+	// the format is 'C-A-S-letter'
+	// C means control
+	// A means alt
+	// S means shift
+	// don't capitalise the letter!
 	const bindings =
 		{ down: 'A-j',
 		up: 'A-k',
@@ -45,16 +50,20 @@ function wrangling_keystrokes(window)
 		add: 'A-n',
 		remove: 'A-d',
 		toggle_rel_type: 'A-t', }
-		
+
 	let keys = new Map()
 
 	const K_ = a => b => () => a(b)
+	const B = a => b => c => a(b(c))
 	const D1 = f => filter => a => b => f(filter(a))(filter(b))
 	const D2 = f => fa => fb => a => b => f(fa(a))(fb(b))
 	const T = x => f => f(x)
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
-	const href_ends_with = x => e => e.href.endsWith(x)
+	const qs = q => node => rejecter(null)(node.querySelector(q))
+	const qss = q => node => Array.from(node.querySelectorAll(q))
+	const href = x => x.href
+	const endsWith = s => x => x.endsWith(s)
 	const last = xs => xs[xs.length - 1]
 	const initial = xs => xs.slice(0, xs.length - 1)
 	const focus = x => x.focus()
@@ -75,17 +84,35 @@ function wrangling_keystrokes(window)
 	const sans = n => filter((x,i) => i !== n)
 	const findIndex = f => xs => rejecter(-1)(xs.findIndex(f))
 	const find = f => xs => rejecter(undefined)(xs.find(f))
-	const rejecter = bad => x => x === bad ? Promise.reject(null) : Promise.resolve(x)
+	const rejecter = bad => x => x === bad ? Maybe.nothing() : Maybe.of(x)
 	const then = f => p => p.then(f)
-	const otherwise = f => p => p.catch(f)
+	const otherwise = f => p => p.else(f)
 	const pluck = k => x => x[k]
 	const tap = f => x => { f(x) ; return x }
 	const add = a => b => a + b
+	const addr = a => b => b + a
 	const length = x => x.length
 	const is = a => b => a === b
 	const value = x => x.value
-	Promise.nothing = () => Promise.reject(null)
-	Promise.of = x => Promise.resolve(x)
+	const match = regex => x => x.match(regex)
+
+	class Maybe
+		{ constructor(x) { this.x = x }
+		then(f)
+			{ if (this.x === null) return this
+			const x = f(this.x)
+			if (x instanceof Maybe)
+				return x
+			else return Maybe.of(x) }
+		else(f)
+			{ if (this.x !== null) return
+			else f(this.x)
+			return this }
+		finally(f)
+			{ f(this.x)
+			return this }
+		static of(x) { return new Maybe(x) }
+		static nothing() { return new Maybe(null) }}
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -171,6 +198,13 @@ function wrangling_keystrokes(window)
 		each(f)
 			{ for (const x of this._children.values())
 				f(x)
+			return this }
+		bind(o)
+			{ this.element.value = o.get()
+			this.element.onchange = () => o.map(just(this.element.value))
+			this.on(o, (x, me) =>
+				{ if (me.element.value === x) return
+				me.element.value = x })
 			return this }}
 
 	class Options extends E
@@ -178,13 +212,12 @@ function wrangling_keystrokes(window)
 			{ super('select')
 			this.children(
 				Object.entries(options).map(([text, value]) =>
-					new E('option').text(text).value(value))) }
-		bind(o)
-			{ this.element.onchange = () => o.map(just(this.element.value))
-			this.on(o, (x, me) =>
-				{ if (me.element.value === x) return
-				me.element.value = x })
-			return this }}
+					new E('option').text(text).value(value))) }}
+
+	class TextBox extends E
+		{ constructor()
+			{ super('input')
+			.style('max-width: 50em; margin: 1em; display: block;') }}
 
 	function main() { wrangling_check(window.location.pathname) }
 
@@ -298,21 +331,21 @@ function wrangling_keystrokes(window)
 			define_key(bindings.select_characters, K_(click)(allchars)) }
 
 		function focus_syn_bar()
-			{ const x = $('#edit_tag fieldset:first-of-type .delete')
-			if (x) x.click()
-			$('input#tag_syn_string_autocomplete').focus() }
+			{ qs('#edit_tag fieldset:first-of-type .delete')(document)
+			.then(click)
+			.finally(() =>
+				qs('input#tag_syn_string_autocomplete')(document)
+				.then(focus)) }
 
 		function relationship_check()
 			{ const element = $('#edit_tag > fieldset:nth-child(4) > dl:nth-child(3) > dd:nth-child(4) > strong:nth-child(1)')
 			return (element && element.innerHTML === 'Relationship') }
 
 		function synonym_check()
-			{ const element = $('p.actions:nth-of-type(2) > a')
-			return Boolean(element) }
+			{ return Boolean($('p.actions:nth-of-type(2) > a')) }
 
 		function characters_check()
-			{ const element = $('dd[title="Characters"] a.check_all')
-			return Boolean(element) }}
+			{ return Boolean($('dd[title="Characters"] a.check_all')) } }
 
 	function wrangle_tags_page()
 		{ console.log('wrangle tags page activated')
@@ -323,8 +356,8 @@ function wrangling_keystrokes(window)
 		const inputbar = $('#fandom_string_autocomplete')
 
 		const rows = $$('tbody > tr')
-		let selected_row = null
-		const current_row = () => rows[selected_row]
+		let selected_row = Maybe.nothing()
+		const current_row = () => selected_row.then(x=>rows[x])
 
 		define_key(bindings.save, K_(click)(save))
 		define_key(bindings.focus_fandom, K_(focus)(inputbar))
@@ -339,74 +372,84 @@ function wrangling_keystrokes(window)
 		define_key(bindings.open_comments, open_comments)
 
 		function deselect_row()
-			{ current_row().classList.remove('focused') }
+			{ current_row().then(x => x.classList.remove('focused')) }
 
 		function select_row()
-			{ const element = current_row()
-			element.classList.add('focused')
-			if (!is_in_view(element))
-				element.scrollIntoView(false) }
+			{ current_row().then(x =>
+				{ x.classList.add('focused')
+				if (!is_in_view(x))
+					x.scrollIntoView(false)}) }
 
 		function select_first_row()
-			{ selected_row = 0
+			{ selected_row = Maybe.of(0)
 			select_row() }
 
 		function select_last_row()
-			{ selected_row = rows.length - 1
+			{ selected_row = Maybe.of(rows.length - 1)
 			select_row() }
 
 		function select_next_row()
-			{ if (selected_row === null) select_first_row()
-			else if (selected_row + 1 < rows.length) {
-				deselect_row()
-				selected_row++
-				select_row() }}
+			{ selected_row
+			.then(rejecter(rows.length - 1))
+			.then(PP(
+				tap(deselect_row),
+				x => selected_row = Maybe.of(x+1)))
+			.then(select_row)
+			.else(select_first_row) }
 
 		function select_previous_row()
-			{ if (selected_row === null) select_last_row()
-			else if (selected_row > 0)
-				{ deselect_row()
-				selected_row--
-				select_row() }}
+			{ selected_row
+			.then(rejecter(0))
+			.then(PP(
+				tap(deselect_row),
+				tap(x=>selected_row = Maybe.of(x-1)),
+				select_row))
+			.else(select_last_row) }
 
 		function open_edit_tag_page()
-			{ if (selected_row === null) return
-			P(
-				$$('ul.actions li a', current_row())
-				.find(href_ends_with('edit'))
-				.href,
-				open) }
+			{ current_row()
+			.then(PP(
+				qss('ul.actions li a'),
+				find(B(endsWith('edit'))(href))))
+			.then(PP(
+				href,
+				open)) }
 
 		function open_mergers_page()
-			{ if (selected_row === null) return
-			P(
-				$$('ul.actions li a', current_row())
-				.find(href_ends_with('edit'))
-				.href
-				.match(/(.+)\/edit/)[1] +
-				'/wrangle?page=1&show=mergers',
-				open) }
+			{ current_row()
+			.then(PP(
+				qss('ul.actions li a'),
+				find(B(endsWith('edit'))(href))))
+			.then(PP(
+				href,
+				match(/(.+)\/edit/),
+				pluck(1),
+				addr('/wrangle?page=1&show=mergers'),
+				open)) }
 
 		function open_comments()
-			{ if (selected_row === null) return
-			P($$('ul.actions li a', current_row())
-				.find(href_ends_with('edit'))
-				.href
-				.match(/(.+)\/edit/)[1] +
-				'/comments',
-				open) }
+			{ current_row()
+			.then(PP(
+				qss('ul.actions li a'),
+				find(B(endsWith('edit'))(href))))
+			.then(PP(
+				href,
+				match(/(.+)\/edit/),
+				pluck(1),
+				addr('/comments'),
+				open)) }
 
 		function toggle_mass_wrangling_selected()
-			{ if (selected_row === null) return
-			$('th input[type="checkbox"]', current_row()).click() }
+			{ current_row()
+			.then(qs('th input[type="checkbox"]'))
+			.then(click) }
 
 		function open_works()
-			{ if (selected_row === null) return
-			P(
-				$$('ul.actions li a', current_row())
-				.find(href_ends_with('works'))
-				.href,
-				open) }}
+			{ current_row()
+			.then(PP(
+				qss('ul.actions li a'),
+				find(B(endsWith('works'))(href))))
+			.then(PP(href, open)) } }
 
 	function tag_comments_page()
 		{ console.log('tag comments page activated')
@@ -429,7 +472,7 @@ function wrangling_keystrokes(window)
 		const freeform = $('#tag_type_freeform')
 		const submit = $('p.submit.actions input[type="submit"]')
 
-		define_key(bindings.focus_syn, K_(focus)(name))
+		define_key(bindings.focus_tag_name, K_(focus)(name))
 		define_key(bindings.toggle_canonical, K_(click)(canonical))
 		define_key(bindings.focus_fandom, K_(click)(fandom))
 		define_key(bindings.focus_characters, K_(click)(character))
@@ -445,26 +488,23 @@ function wrangling_keystrokes(window)
 		rejecter(null)($('#edit_tag fieldset:first-of-type .delete')).then(click)
 		const rel_field = $('input#tag_syn_string_autocomplete')
 
-		let focused = Promise.nothing()
-		const new_input = x => new E('input')
-			.style('max-width: 50em; margin: 1em; display: block;')
-			.value(x.get())
-			.focus(e =>
-				{ focused = Promise.of(e.target)
-				e.target.classList.add('focused') })
-			.unfocus(e =>
-				{ if (focused === e.target) focused = Promise.nothing()
-				e.target.classList.remove('focused') })
-			.input(e => x.map(just(e.target.value)))
+		let focused = Maybe.nothing()
 		const parts = new Observable([])
+		parts.length = function() { return this.get().length }
 		const reltype = new Observable('/')
 
 		const editbox = new E('div')
 			.on(parts, (x, me) => {
-				P(x,
-					map(new_input),
-					x => me.children(x))
-				focused = Promise.nothing() })
+				me.children(x.map(x =>
+					new TextBox()
+					.bind(x)
+					.focus(e =>
+						{ focused = Maybe.of(e.target)
+						e.target.classList.add('focused') })
+					.unfocus(e =>
+						{ focused = Maybe.nothing()
+						e.target.classList.remove('focused') })))
+				focused = Maybe.nothing() })
 
 		const fieldset = new E('fieldset')
 			.child(new Options({ 'romantic': '/', 'platonic': ' & ' })
@@ -480,7 +520,7 @@ function wrangling_keystrokes(window)
 			just,
 			map,
 			T(parts))
-	
+
 		insertBefore(fieldset.element, $('#edit_tag fieldset:nth-of-type(2)'))
 		editbox.element.firstElementChild.focus()
 
@@ -514,17 +554,18 @@ function wrangling_keystrokes(window)
 			editbox.element.lastElementChild.focus() }
 
 		function remove_char()
-			{ if (parts.get().length <= 1) return
+			{ if (parts.length() <= 1) return
 			P(focused,
 				then(focused =>
 					P(parts.get(),
 						findIndex(D2(is)(value)(get)(focused)))),
-				then(
+				then(PP(
 					tap(PP(sans, map, T(parts))),
-					PP(x => parts.get().length === x ? x - 1 : x,
+					tap(log),
+					PP(x => parts.length() >= x ? parts.length() - 1 : x,
 						pluck,
 						T(editbox.element.children),
-						focus))) }
+						focus)))) }
 
 		function focus_next()
 			{ P(focused,
