@@ -101,6 +101,7 @@ function wrangling_keystrokes(window)
 	const scroll_into_view = tap(x => x.scrollIntoView(false))
 	const WHEN = cond => then => x => cond(x) ? then(x) : x
 	const target = x => x.target
+	const trim = x => x.trim()
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
