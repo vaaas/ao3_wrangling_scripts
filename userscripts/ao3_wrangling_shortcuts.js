@@ -53,7 +53,8 @@ function wrangling_keystrokes(window)
 
 	let keys = new Map()
 
-	const K_ = a => b => () => a(b)
+	const K = x => () => x
+	const K1 = a => b => () => a(b)
 	const B = a => b => c => a(b(c))
 	const B1 = a => b => c => d => a(b(c)(d))
 	const D = f => fa => fb => a => b => f(fa(a))(fb(b))
@@ -75,7 +76,6 @@ function wrangling_keystrokes(window)
 	const map = f => x => x.map(f)
 	const split = d => x => x.split(d)
 	const N = o => x => new o(x)
-	const just = x => () => x
 	const get = x => x.get()
 	const insertBefore = (what, where) => where.parentNode.insertBefore(what, where)
 	const flatten = x => x.flat()
@@ -94,14 +94,14 @@ function wrangling_keystrokes(window)
 	const isnt = B1(not)(is)
 	const value = x => x.value
 	const match = regex => x => x.match(regex)
-	const maybe = f => x => x === null ? x : f(x)
-	const nothing = f => x => x !== null ? x : f(x)
 	const add_class = c => tap(x => x.classList.add(c))
 	const remove_class = c => tap(x => x.classList.remove(c))
 	const scroll_into_view = tap(x => x.scrollIntoView(false))
-	const WHEN = cond => then => x => cond(x) ? then(x) : x
 	const target = x => x.target
 	const trim = x => x.trim()
+	const WHEN = cond => then => x => cond(x) ? then(x) : x
+	const maybe = WHEN(isnt(null))
+	const nothing = WHEN(is(null))
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -190,7 +190,7 @@ function wrangling_keystrokes(window)
 			return this }
 		bind(o)
 			{ this.element.value = o.get()
-			this.element.onchange = () => o.map(just(this.element.value))
+			this.element.onchange = () => o.map(K(this.element.value))
 			this.on(o, me => WHEN(isnt(me.element.value))(x => me.element.value=x))
 			return this }}
 
@@ -294,29 +294,29 @@ function wrangling_keystrokes(window)
 		const all_fandoms = $('dd[title="Fandoms"] a.check_all')
 		const mergers = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/wrangle?page=1&show=mergers'
 
-		define_key(bindings.save, K_(click)(save))
+		define_key(bindings.save, K1(click)(save))
 		define_key(bindings.focus_syn, focus_syn_bar)
-		define_key(bindings.focus_fandom, K_(focus)(fandom))
-		define_key(bindings.toggle_unwrangleable, K_(click)(unwrangleable))
-		define_key(bindings.open_works, K_(open)(works.href))
-		define_key(bindings.open_comments, K_(open)(comments.href))
-		define_key(bindings.toggle_canonical, K_(click)(canonical))
-		define_key(bindings.open_mergers, K_(open)(mergers))
-		define_key(bindings.focus_tag_name, K_(focus)(tagname))
-		define_key(bindings.select_fandoms, K_(click)(all_fandoms))
+		define_key(bindings.focus_fandom, K1(focus)(fandom))
+		define_key(bindings.toggle_unwrangleable, K1(click)(unwrangleable))
+		define_key(bindings.open_works, K1(open)(works.href))
+		define_key(bindings.open_comments, K1(open)(comments.href))
+		define_key(bindings.toggle_canonical, K1(click)(canonical))
+		define_key(bindings.open_mergers, K1(open)(mergers))
+		define_key(bindings.focus_tag_name, K1(focus)(tagname))
+		define_key(bindings.select_fandoms, K1(click)(all_fandoms))
 
 		if (relationship_check())
 			{ const characters = $('#tag_character_string_autocomplete')
 			define_key(bindings.toggle_rel_helper, rel_helper)
-			define_key(bindings.focus_characters, K_(focus)(characters)) }
+			define_key(bindings.focus_characters, K1(focus)(characters)) }
 
 		if (synonym_check())
 			{ const edit_synonym = $('p.actions:nth-of-type(2) > a')
-			define_key(bindings.go_to_canonical, K_(click)(edit_synonym)) }
+			define_key(bindings.go_to_canonical, K1(click)(edit_synonym)) }
 
 		if (characters_check())
 			{ const allchars = $('dd[title="Characters"] a.check_all')
-			define_key(bindings.select_characters, K_(click)(allchars)) }
+			define_key(bindings.select_characters, K1(click)(allchars)) }
 
 		function focus_syn_bar()
 			{ P(document,
@@ -348,14 +348,14 @@ function wrangling_keystrokes(window)
 		let selected_row = null
 		const current_row = () => maybe(x => rows[x])(selected_row)
 
-		define_key(bindings.save, K_(click)(save))
-		define_key(bindings.focus_fandom, K_(focus)(inputbar))
+		define_key(bindings.save, K1(click)(save))
+		define_key(bindings.focus_fandom, K1(focus)(inputbar))
 		define_key(bindings.down, select_next_row)
 		define_key(bindings.up, select_previous_row)
 		define_key(bindings.edit_tag, open_edit_tag_page)
 		define_key(bindings.toggle_selection, toggle_mass_wrangling_selected)
-		define_key(bindings.next, K_(click)(next))
-		define_key(bindings.previous, K_(click)(previous))
+		define_key(bindings.next, K1(click)(next))
+		define_key(bindings.previous, K1(click)(previous))
 		define_key(bindings.open_works, open_works)
 		define_key(bindings.open_mergers, open_mergers_page)
 		define_key(bindings.open_comments, open_comments)
@@ -447,10 +447,10 @@ function wrangling_keystrokes(window)
 		const submit = $('.new_comment input[type="submit"]')
 		const href = location.origin + location.pathname.match(/(\/tags\/[^\/]+)/)[1] + '/edit'
 
-		window.requestAnimationFrame(K_(focus)(textarea))
+		window.requestAnimationFrame(K1(focus)(textarea))
 
-		define_key(bindings.save, K_(click)(submit))
-		define_key(bindings.edit_tag, K_(open)(href)) }
+		define_key(bindings.save, K1(click)(submit))
+		define_key(bindings.edit_tag, K1(open)(href)) }
 
 	function new_tag_page()
 		{ console.log('new tag page activated')
@@ -462,13 +462,13 @@ function wrangling_keystrokes(window)
 		const freeform = $('#tag_type_freeform')
 		const submit = $('p.submit.actions input[type="submit"]')
 
-		define_key(bindings.focus_tag_name, K_(focus)(name))
-		define_key(bindings.toggle_canonical, K_(click)(canonical))
-		define_key(bindings.focus_fandom, K_(click)(fandom))
-		define_key(bindings.focus_characters, K_(click)(character))
-		define_key(bindings.click_relationship, K_(click)(relationship))
-		define_key(bindings.click_freeform, K_(click)(freeform))
-		define_key(bindings.save, K_(click)(submit)) }
+		define_key(bindings.focus_tag_name, K1(focus)(name))
+		define_key(bindings.toggle_canonical, K1(click)(canonical))
+		define_key(bindings.focus_fandom, K1(click)(fandom))
+		define_key(bindings.focus_characters, K1(click)(character))
+		define_key(bindings.click_relationship, K1(click)(relationship))
+		define_key(bindings.click_freeform, K1(click)(freeform))
+		define_key(bindings.save, K1(click)(submit)) }
 
 	function rel_helper()
 		{ console.log('rel helper activated')
@@ -501,11 +501,12 @@ function wrangling_keystrokes(window)
 
 		P($('#tag_name').value,
 			split('/'),
+			tap(x => reltype.map(K(x.length > 1 ? '/' : ' & '))),
 			map(split('&')),
 			flatten,
 			map(trim),
 			map(N(Observable)),
-			just,
+			K,
 			map,
 			T(parts))
 
@@ -526,7 +527,8 @@ function wrangling_keystrokes(window)
 			{ reltype.map(x => x === '/' ? ' & ' : '/') }
 
 		function commit_rel()
-			{ P(parts,
+			{ rel_field.focus()
+			P(parts,
 			get,
 			map(get),
 			join(reltype.get()),
