@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.7.1
+// @version	0.7.2
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -59,6 +59,8 @@ function wrangling_keystrokes(window)
 	const B1 = a => b => c => d => a(b(c)(d))
 	const D = f => fa => fb => a => b => f(fa(a))(fb(b))
 	const T = x => f => f(x)
+	const P = (x, ...xs) => xs.reduce((a,b) => b(a), x)
+	const PP = (...xs) => x => xs.reduce((a,b) => b(a), x)
 	const $ = (q, node=document) => node.querySelector(q)
 	const $$ = (q, node=document) => Array.from(node.querySelectorAll(q))
 	const not = x => !x
@@ -71,8 +73,6 @@ function wrangling_keystrokes(window)
 	const focus = x => x.focus()
 	const click = x => x.click()
 	const open = x => window.open(x, 1)
-	const P = (x, ...xs) => xs.reduce((a,b) => b(a), x)
-	const PP = (...xs) => x => xs.reduce((a,b) => b(a), x)
 	const map = f => x => x.map(f)
 	const split = d => x => x.split(d)
 	const N = o => x => new o(x)
@@ -99,9 +99,9 @@ function wrangling_keystrokes(window)
 	const scroll_into_view = tap(x => x.scrollIntoView(false))
 	const target = x => x.target
 	const trim = x => x.trim()
-	const WHEN = cond => then => x => cond(x) ? then(x) : x
-	const maybe = WHEN(isnt(null))
-	const nothing = WHEN(is(null))
+	const when = cond => then => x => cond(x) ? then(x) : x
+	const maybe = when(isnt(null))
+	const nothing = when(is(null))
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -191,7 +191,7 @@ function wrangling_keystrokes(window)
 		bind(o)
 			{ this.element.value = o.get()
 			this.element.onchange = () => o.map(K(this.element.value))
-			this.on(o, me => WHEN(isnt(me.element.value))(x => me.element.value=x))
+			this.on(o, me => when(isnt(me.element.value))(x => me.element.value=x))
 			return this }}
 
 	class Options extends E
@@ -366,7 +366,7 @@ function wrangling_keystrokes(window)
 		function select_row()
 			{ P(current_row(),
 				maybe(PP(add_class('focused'),
-					WHEN(B(not)(is_in_view))(scroll_into_view)))) }
+					when(B(not)(is_in_view))(scroll_into_view)))) }
 
 		function select_first_row()
 			{ deselect_row()
