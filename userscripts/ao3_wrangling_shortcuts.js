@@ -49,7 +49,8 @@ function wrangling_keystrokes(window)
 		click_relationship: 'A-r',
 		add: 'A-n',
 		remove: 'A-d',
-		toggle_rel_type: 'A-t', }
+		toggle_rel_type: 'A-t',
+		flip: 'A-f', }
 
 	let keys = new Map()
 
@@ -57,7 +58,6 @@ function wrangling_keystrokes(window)
 	const K1 = a => b => () => a(b)
 	const B = a => b => c => a(b(c))
 	const B1 = a => b => c => d => a(b(c)(d))
-	const D = f => fa => fb => a => b => f(fa(a))(fb(b))
 	const T = x => f => f(x)
 	const P = (x, ...xs) => xs.reduce((a,b) => b(a), x)
 	const PP = (...xs) => x => xs.reduce((a,b) => b(a), x)
@@ -81,18 +81,13 @@ function wrangling_keystrokes(window)
 	const flatten = x => x.flat()
 	const join = s => x => x.join(s)
 	const filter = f => x => x.filter(f)
-	const sans = n => filter((x,i) => i !== n)
-	const findIndex = f => xs => rejecter(-1)(xs.findIndex(f))
 	const find = f => xs => rejecter(undefined)(xs.find(f))
 	const rejecter = bad => x => x === bad ? null : x
 	const pluck = k => x => x[k]
 	const tap = f => x => { f(x) ; return x }
-	const add = a => b => a + b
 	const addr = a => b => b + a
-	const length = x => x.length
 	const is = a => b => a === b
 	const isnt = B1(not)(is)
-	const value = x => x.value
 	const match = regex => x => x.match(regex)
 	const add_class = c => tap(x => x.classList.add(c))
 	const remove_class = c => tap(x => x.classList.remove(c))
@@ -102,6 +97,8 @@ function wrangling_keystrokes(window)
 	const when = cond => then => x => cond(x) ? then(x) : x
 	const maybe = when(isnt(null))
 	const nothing = when(is(null))
+	const first = pluck(0)
+	const sans = B(filter)(isnt)
 
 	const swap = (a, b) => x =>
 		{ const av = x[a]
@@ -134,9 +131,12 @@ function wrangling_keystrokes(window)
 		{ constructor(x)
 			{ this.element = document.createElement(x)
 			this.watches = new Map()
-			this._children = new Set() }
+			this._children = new Set()
+			this.parent = null
+			this.index = null }
 		child(x)
 			{ x.parent = this
+			x.index = this._children.size + 1
 			this._children.add(x)
 			this.element.appendChild(x.element)
 			return this }
@@ -166,10 +166,10 @@ function wrangling_keystrokes(window)
 			{ this.element.value = x
 			return this }
 		focus(f)
-			{ this.element.onfocus = f
+			{ this.element.onfocus = f(this)
 			return this }
 		unfocus(f)
-			{ this.element.addEventListener('focusout', f)
+			{ this.element.addEventListener('focusout', f(this))
 			return this }
 		style(x)
 			{ this.element.style = x
@@ -190,8 +190,9 @@ function wrangling_keystrokes(window)
 			return this }
 		bind(o)
 			{ this.element.value = o.get()
-			this.element.onchange = () => o.map(K(this.element.value))
-			this.on(o, me => when(isnt(me.element.value))(x => me.element.value=x))
+			this.element.onchange = () => { console.log(this.element.value) ; o.map(K(this.element.value)) }
+			this.on(o, me => x => me.element.value = x)
+			//this.on(o, me => when(isnt(me.element.value))(x => me.element.value=x))
 			return this }}
 
 	class Options extends E
@@ -489,8 +490,8 @@ function wrangling_keystrokes(window)
 				map(x =>
 					new TextBox()
 					.bind(x)
-					.focus(PP(target, tap(x => focused=x), add_class('focused')))
-					.unfocus(PP(target, tap(() => focused=null), remove_class('focused')))),
+					.focus(me => PP(target, add_class('focused'), tap(() => focused=me)))
+					.unfocus(() => PP(target, remove_class('focused'), tap(() => focused=null)))),
 				me.children.bind(me)))
 
 		const fieldset = new E('fieldset')
@@ -522,6 +523,16 @@ function wrangling_keystrokes(window)
 		define_key(bindings.previous, move_before)
 		define_key(bindings.next, move_after)
 		define_key(bindings.toggle_rel_type, toggle_rel)
+		define_key(bindings.flip, flip_name)
+
+		function flip_name()
+			{ P(focused,
+				maybe(PP(
+					pluck('watches'), x=>x.keys(), Array.from, first,
+					map(PP(
+						split(' '),
+						when(x=>x.length > 1)(swap(0, 1)),
+						join(' ')))))) }
 
 		function toggle_rel()
 			{ reltype.map(x => x === '/' ? ' & ' : '/') }
@@ -544,43 +555,37 @@ function wrangling_keystrokes(window)
 			editbox.element.lastElementChild.focus() }
 
 		function remove_char()
-			{ if (parts.length() <= 1) return
-			P(focused,
-				maybe(PP(D(is)(value)(get), findIndex, T(parts.get()))),
+			{ P(focused,
+				maybe(x => parts.length() <= 1 ? null : x),
 				maybe(PP(
-					tap(PP(sans, map, T(parts))),
-					PP(x => parts.length() >= x ? parts.length() - 1 : x,
-						pluck,
-						T(editbox.element.children),
-						focus)))) }
+					tap(PP(pluck('watches'), sans, map, T(parts))),
+					x => editbox.element.children[x.index-1].focus()))) }
 
 		function focus_next()
 			{ P(focused,
-				maybe(PP(pluck('nextSibling'))),
+				maybe(x => x.element.nextSibling),
 				maybe(focus),
 				nothing(()=>editbox.element.firstElementChild.focus())) }
 
 		function focus_prev()
 			{ P(focused,
-				maybe(PP(pluck('previousSibling'))),
+				maybe(x => x.element.previousSibling),
 				maybe(focus),
 				nothing(()=>editbox.element.lastElementChild.focus())) }
 
 		function move_before()
 			{ P(focused,
-				maybe(PP(D(is)(value)(get), findIndex, T(parts.get()))),
-				maybe(rejecter(0)),
+				maybe(PP(pluck('index'), rejecter(0))),
 				maybe(PP(
 					tap(x => parts.map(swap(x, x-1))),
-					PP(add(-1), pluck, T(editbox.element.children), focus)))) }
+					x => editbox.element.children[x-1].focus()))) }
 
 		function move_after()
 			{ P(focused,
-				maybe(PP(D(is)(value)(get), findIndex, T(parts.get()))),
-				maybe(P(parts, get, length, add(-1), rejecter)),
+				maybe(PP(pluck('index'), rejecter(parts.length()-1))),
 				maybe(PP(
 					tap(x => parts.map(swap(x, x+1))),
-					PP(add(1), pluck, T(editbox.element.children), focus)))) } }
+					x => editbox.element.children[x+1].focus()))) } }
 
 	main() }
 

@@ -70,6 +70,7 @@ alt-d | delete the current focused character field
 alt-t | toggle between / and & rels
 alt-s | commit the edits
 alt-v | quit without commiting
+alt-f | flip name and surname
 
 ### List of bindings — Tag listings
 
