@@ -1,1 +1,1 @@
-javascript:!function(){const n=location.pathname.match(new RegExp("^/users/([^/]+)"));n[1]&&(location.pathname=`/admin/users/${n[1]}`)}();
+javascript:!function(){const a=location.pathname.match(/^\/users\/([^/]+)/);a[1]&&(location.pathname="/admin/users/"+a[1])}();

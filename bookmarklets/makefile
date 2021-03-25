@@ -5,4 +5,4 @@ build:
 
 build/%.js: %.js
 	echo -n "javascript:" > "$@"
-	terser -m toplevel -c -- "$<" >> "$@"
+	terser -m -c unsafe,toplevel -- "$<" >> "$@"

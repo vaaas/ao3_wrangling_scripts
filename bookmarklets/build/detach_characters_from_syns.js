@@ -1,1 +1,1 @@
-javascript:function e(e){const o=e=>0!==e.querySelectorAll("#parent_Character_associations_to_remove_checkboxes li").length,t=e=>e.querySelector("dd.tags.listbox.group[title='Characters'] ul.actions li a.check_all"),l=e=>e.querySelector("form#edit_tag"),c=e=>new Promise(o=>setTimeout(o,e)),n=e=>new Promise(o=>{const t=window.open(e);t.onload=(e=>o(t))});!async function(e){for(let r=0;r<e.length;r++){url=e[r];const a=await n(url),i=a.document;o(i)&&(t(i).click(),l(i).submit(),console.log(url)),a.close(),await c(3e3)}}(e)}
+javascript:
