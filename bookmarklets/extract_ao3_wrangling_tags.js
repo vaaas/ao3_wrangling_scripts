@@ -25,7 +25,7 @@
 			tap(x => url = get_next(x)),
 			qss('tr th[title="tag"] label'),
 			map(pluck('innerHTML')),
-			x => wait(c++ < 1000 ? 3e3 : 10e3)(x))
+			x => wait(c++ < 1000 ? 3e3 : 10e3)(x)) }
 
 	async function main()
 		{ if (is_sunday())
