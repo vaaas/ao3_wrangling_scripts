@@ -10,9 +10,9 @@ Extracts all tags from a tag wrangling page into a text file for local searching
 2. Select the sorting method and the shown tags as you normally would through the table labels and filter buttons.
 3. Go to the page you want to start from. If you want everything, start from the first page.
 4. Activate the bookmarklet OR paste the source code in the browser console (available through F12, Ctrl+Shift+K, Ctrl+Shift+J).
-5. A new tab will pop up with the names of all the tags, each in its own line. It grows as more tags are read. An alert will be shown when it's done. Copy the tags to a file and enjoy.
+5. A new textarea field will appear with the names of all the tags, each in its own line. It grows as more tags are read. An alert will be shown when it's done. Copy the tags to a file and enjoy.
 
-Progress information will be printed in the browser console. The script is rate-limitted to avoid stressing the AO3 servers too much. If you have a lot of tags it can take hours to complete and it requires a stable internet connection. Good luck.
+The script is rate-limitted to avoid stressing the AO3 servers too much. If you have a lot of tags it can take hours to complete and it requires a stable internet connection. Good luck.
 
 ## ao3 tags as table
 
