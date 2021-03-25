@@ -7,8 +7,7 @@
 	const I = x => x
 	const qs = x => d => d.querySelector(x)
 	const qss = x => d => d.querySelectorAll(x)
-	const pipe = async (x, ...fs) => reduce(I)(x)(fs)
-	const get_next = qs('a[rel="next"]')
+	const pipe = (x, ...fs) => reduce(I)(x)(fs)
 	const wait = x => v => new Promise(ok => setTimeout(() => ok(v), x))
 	const is_sunday = () => new Date().getDay() === 0
 	const is_nf = () => RegExp('^/tags/No Fandom/wrangle').test(location.pathname)
@@ -22,7 +21,7 @@
 		{ let url = x, c = 0
 		while (url) yield* await pipe
 			(url, fetch, text, parse,
-			tap(x => url = get_next(x)),
+			tap(x => url = qs('a[rel="next"]')(x)),
 			qss('tr th[title="tag"] label'),
 			map(pluck('innerHTML')),
 			x => wait(c++ < 1000 ? 3e3 : 10e3)(x)) }
@@ -37,8 +36,7 @@
 			(elem('textarea'),
 			before(qs('table')(document)),
 			e => reduce(x => tap(e => e.value += '\n' + x))(e)(results_generator(location.href)))
-		document.title = 'Done!'
-		alert('Done!') }
+		aletrn(document.title = 'Done!') }
 
 	main()
 })()
