@@ -1,6 +1,6 @@
 {
 	"browser": true,
-	"esversion": 8,
+	"esversion": 9,
 	"asi": true,
 	"unused": true
 }
