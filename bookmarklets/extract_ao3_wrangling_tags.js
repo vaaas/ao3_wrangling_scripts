@@ -20,7 +20,7 @@
 
 	async function* results_generator(x)
 		{ let url = x, c = 0
-		while (url !== null) yield* await pipe
+		while (url) yield* await pipe
 			(url, fetch, text, parse,
 			tap(x => url = get_next(x)),
 			qss('tr th[title="tag"] label'),
