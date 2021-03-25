@@ -36,7 +36,7 @@
 			(elem('textarea'),
 			before(qs('table')(document)),
 			e => reduce(x => tap(e => e.value += '\n' + x))(e)(results_generator(location.href)))
-		aletrn(document.title = 'Done!') }
+		alert(document.title = 'Done!') }
 
 	main()
 })()
