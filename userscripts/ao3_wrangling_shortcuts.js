@@ -11,7 +11,7 @@
 // @match	https://archiveofourown.org/*
 // @match	http://insecure.archiveofourown.org/*
 //
-// @version	0.7.4
+// @version	0.7.5
 // @updateURL	https://raw.githubusercontent.com/vaaas/ao3_wrangling_scripts/master/userscripts/ao3_wrangling_shortcuts.js
 // ==/UserScript==
 
@@ -404,13 +404,7 @@ function wrangling_keystrokes(window)
 			tap(x => reltype.value = x.length > 1 ? '/' : ' & '),
 			map(split('&')),
 			flatten,
-			map(PP(
-				trim,
-				set('value'),
-				x => x(elem('input')),
-				set('style')('max-width: 50em; margin: 1em; display: block;'),
-				listen('focus')(PP(target, add_class('focused'), tap(x=>focused=x))),
-				listen('focusout')(PP(target, remove_class('focused'), tap(()=>focused=null))))),
+			map(PP(trim, input_field)),
 			children,
 			T(elem('div')))
 
@@ -431,6 +425,13 @@ function wrangling_keystrokes(window)
 		define_key(bindings.next, move_after)
 		define_key(bindings.toggle_rel_type, toggle_rel)
 		define_key(bindings.flip, flip_name)
+
+		function input_field(x)
+			{ return P(elem('input'),
+				set('value')(x),
+				set('style')('max-width: 50em; margin: 1em; display: block;'),
+				listen('focus')(PP(target, add_class('focused'), tap(x=>focused=x))),
+				listen('focusout')(PP(target, remove_class('focused'), tap(()=>focused=null)))) }
 
 		function flip_name()
 			{ P(focused,
@@ -458,9 +459,7 @@ function wrangling_keystrokes(window)
 			keys = keys_cache }
 
 		function append_char()
-			{ editbox.appendChild(P(
-				elem('input'),
-				set('style')('max-width: 50em; margin: 1em; display: block;')))
+			{ editbox.appendChild(input_field(''))
 			editbox.lastElementChild.focus() }
 
 		function remove_char()
