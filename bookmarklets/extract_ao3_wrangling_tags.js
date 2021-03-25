@@ -9,7 +9,7 @@
 	const qss = x => d => d.querySelectorAll(x)
 	const pipe = async (x, ...fs) => reduce(I)(x)(fs)
 	const get_next = qs('a[rel="next"]')
-	const sleep = x => new Promise(ok => setTimeout(ok, x))
+	const wait = x => v => new Promise(ok => setTimeout(() => ok(v), x))
 	const is_sunday = () => new Date().getDay() === 0
 	const is_nf = () => RegExp('^/tags/No Fandom/wrangle').test(location.pathname)
 	const parser = new DOMParser()
@@ -25,7 +25,7 @@
 			tap(x => url = get_next(x)),
 			qss('tr th[title="tag"] label'),
 			map(pluck('innerHTML')),
-			tap(() => sleep(c++ < 1000 ? 3e3 : 10e3))) }
+			x => wait(c++ < 1000 ? 3e3 : 10e3)(x))
 
 	async function main()
 		{ if (is_sunday())
